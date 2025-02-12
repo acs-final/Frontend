@@ -5,30 +5,37 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowBigRight, ArrowBigLeft, Play, Pause } from "lucide-react";
 
-// API 응답에 따른 인터페이스 정의 (상황에 맞게 수정하세요)
+// API 응답 구조에 맞춘 인터페이스 정의
 interface Body {
   [key: string]: string;
 }
 
-interface BookResult {
-  title: string;
-  body: Body;
+interface ImageUrl {
+  imageUrl: string;
+}
+
+interface Mp3Url {
+  mp3Url: string;
 }
 
 interface BookData {
-  result: BookResult;
+  fairytaleId: number;
+  title: string;
+  score: number;
+  genre: string;
+  body: Body;
+  imageUrl: ImageUrl[];
+  mp3Url: Mp3Url[];
 }
 
 export default function BookDetailPage() {
-  // useParams에서 id가 string | undefined 인 점을 고려
   const { id } = useParams();
   const [bookData, setBookData] = useState<BookData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // 동화책 페이지 전용 상태
+  // 동화 페이지 전용 상태
   const [currentPage, setCurrentPage] = useState(0);
-  // audioRef에 HTMLAudioElement 타입을 명시 (초기값은 null)
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
@@ -44,7 +51,8 @@ export default function BookDetailPage() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setBookData(data);
+        // result 필드 안의 데이터를 사용합니다.
+        setBookData(data.result);
       } catch (err: any) {
         console.error("GET 요청 실패:", err);
         setError(err.message);
@@ -60,26 +68,31 @@ export default function BookDetailPage() {
   if (error) return <div>Error: {error}</div>;
   if (!bookData) return <div>동화 데이터를 찾을 수 없습니다.</div>;
 
-  // API 응답 구조에 맞게 동화 페이지 데이터를 구성합니다.
-  const result = bookData.result;
+  // 동화 데이터를 기반으로 페이지 배열을 구성합니다.
   const pages =
-    result && result.body
-      ? Object.keys(result.body)
+    bookData && bookData.body
+      ? Object.keys(bookData.body)
           .sort(
             (a, b) =>
               parseInt(a.replace("page", "")) -
               parseInt(b.replace("page", ""))
           )
-          .map((key) => ({
-            text: result.body[key],
-            title: result.title,
-            image: "/storybook/default.png", // 기본 이미지 경로 (필요에 따라 수정)
-            audio: "" // 오디오 데이터가 없으므로 빈 문자열 (원하는 경우 기본 오디오 경로 지정)
+          .map((key, index) => ({
+            text: bookData.body[key],
+            title: bookData.title,
+            image:
+              bookData.imageUrl && bookData.imageUrl.length > 0
+                ? bookData.imageUrl[index % bookData.imageUrl.length].imageUrl
+                : "/storybook/default.png",
+            audio:
+              bookData.mp3Url && bookData.mp3Url.length > 0
+                ? bookData.mp3Url[index % bookData.mp3Url.length].mp3Url
+                : ""
           }))
       : [
           {
             text: "동화 페이지 데이터가 없습니다.",
-            title: result?.title || "제목 없음",
+            title: bookData?.title || "제목 없음",
             image: "/fallback_image.png",
             audio: ""
           }

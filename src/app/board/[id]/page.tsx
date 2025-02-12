@@ -87,11 +87,13 @@ export default function ReviewPage() {
   const [body, setBody] = useState(""); // API로부터 가져올 내용
   const [rating, setRating] = useState(0); // ⭐ 실제 선택된 평점
   const [hoverRating, setHoverRating] = useState(0); // ⭐ 마우스 오버 상태
-  const [submitted, setSubmitted] = useState(false);
+  const [imageUrl, setImageUrl] = useState(""); // API로부터 가져올 이미지 URL
+  const [comment, setComment] = useState(""); // 댓글 입력 상태
+
   // 현재 보여줄 평점: hover 상태가 있으면 hoverRating, 아니면 rating
   const currentRating = hoverRating || rating;
 
-  // API 호출: /api/board/[id] 에서 게시글 데이터 가져오기
+  // API 호출: /api/board/[id] 로 게시글 데이터 가져오기
   useEffect(() => {
     if (id) {
       async function fetchBoard() {
@@ -102,10 +104,25 @@ export default function ReviewPage() {
             return;
           }
           const data = await res.json();
+          console.log(data);
           if (data.isSuccess) {
             setTitle(data.result.title);
-            setBody(data.result.body);
+
+            // body가 객체라면 필요한 속성(text 등)만 추출하고, 문자열이면 그대로 사용
+            setBody(
+              typeof data.result.body === "object" && data.result.body !== null
+                ? data.result.body.text
+                : data.result.body
+            );
+
             setRating(data.result.score);
+
+            // imageUrl이 객체라면 필요한 속성(url 등)만 추출하고, 문자열이면 그대로 사용
+            setImageUrl(
+              typeof data.result.imageUrl === "object" && data.result.imageUrl !== null
+                ? data.result.imageUrl.url
+                : data.result.imageUrl
+            );
           } else {
             console.error("게시글 불러오기 실패:", data.message || data);
           }
@@ -162,197 +179,81 @@ export default function ReviewPage() {
   };
 
   const handleSubmit = () => {
-    setSubmitted(true);
+    // 제출 로직 추가 (필요한 경우 작성)
+    console.log("제출됨");
+  };
+
+  // 댓글 제출 핸들러
+  const handleCommentSubmit = () => {
+    if (comment.trim() === "") return;
+    // 실제 댓글 등록 API 호출 로직을 추가할 수 있음
+    console.log("댓글 제출됨:", comment);
+    setComment("");
   };
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen p-4">
-      <div className="w-full max-w-7xl bg-white rounded-lg shadow-lg p-6 mx-auto flex flex-col">
-        {submitted ? (
-          <>
-            {/* 제목 */}
-            <h3 className="text-2xl font-bold text-center text-gray-800 mb-4">
-              도서 추천
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-auto">
-              {/* 왼쪽: 제목, 내용 */}
-              <div className="flex flex-col items-start space-y-6">
-                <div className="self-center p-0 rounded-lg flex flex-col justify-center items-center">
-                  <Badge variant="outline">
-                    <DollarSign className="w-40 h-40" />
-                  </Badge>
-                </div>
-                <div className="flex flex-col space-y-4 w-full max-w-lg">
-                  {/* 추천 도서 이동 */}
-                  <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-start">
-                    <p className="text-lg font-semibold">크레딧을 획득하셨습니다!</p>
-                    독후감을 작성하셨군요! 100 크레딧을 모으면 동화책을 생성할 수 있습니다.
-                    <div className="self-end flex justify-center space-x-2">
-                      <Button variant="outline" onClick={() => window.location.href = '/mypage'}>
-                        닫기
-                      </Button>
-                      <Button onClick={() => window.location.href = '/mypage'}>
-                        내 책방으로 가기
-                      </Button>
-                    </div>
-                  </div>
-                  {/* 마이페이지 이동 */}
-                  <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-start">
-                    <p className="text-lg font-semibold">비슷한 책을 추천받고 싶으세요?</p>
-                    생성한 책과 비슷한 책을 추천해드려요!!
-                    <div className="self-end flex justify-center space-x-2">
-                      <Button variant="outline" onClick={() => window.location.href = '/recommended'}>
-                        닫기
-                      </Button>
-                      <Button onClick={() => window.location.href = '/recommended'}>
-                        추천받기
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* 오른쪽: 이미지 미리보기, 별점 선택, 버튼 */}
-              <div className="flex flex-col space-y-4">
-                {/* 이미지 미리보기 */}
-                <div className="flex flex-col items-center">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    책 표지
-                  </label>
-                  <div className="border rounded-lg overflow-hidden flex justify-center items-center p-2 bg-gray-100 w-80 h-96">
-                    <Image
-                      src="/storybook/page1.png"
-                      alt="책 표지"
-                      width={240}
-                      height={360}
-                      className="rounded-md"
-                    />
-                  </div>
-                </div>
+      <div className="w-full max-w-7xl rounded-lg shadow-lg p-6 mx-auto flex flex-col">
+        {/* 자유 게시판 내용 */}
+        <h3 className="text-2xl font-bold text-center mb-4">자유 게시판</h3>
 
-                {/* 별점 선택 (5개의 별, 0.5 단위) */}
-                <div className="flex flex-col items-center space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    평점 (0.5 단위)
-                  </label>
-                  <div
-                    className="flex space-x-1"
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <div
-                        key={star}
-                        className="cursor-pointer"
-                        onMouseMove={(e) => handleMouseMove(e, star)}
-                        onClick={(e) => handleStarClick(e, star)}
-                      >
-                        {renderStar(star)}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-500">{rating}점 선택됨</p>
-                </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-auto">
+          {/* 왼쪽: 제목, 내용 */}
+          <div className="flex flex-col space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">제목</label>
+              <Input
+                placeholder="책 제목을 입력하세요"
+                className="w-full"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+            <div className="flex-grow flex flex-col">
+              <label className="block text-sm font-medium mb-1">내용</label>
+              <Textarea
+                placeholder="독후감 내용을 작성해주세요"
+                className="w-full h-80 p-3 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary resize-none"
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+              />
+            </div>
+          </div>
 
-                {/* 제출 / 취소 버튼 */}
-                <div className="flex justify-center space-x-4 pt-2 mt-auto">
-                  <Button onClick={handleSubmit}>
-                    제출하기
-                  </Button>
-                  <Button>
-                    취소하기
-                  </Button>
-                </div>
+          {/* 오른쪽: 이미지 미리보기, 별점 선택, 버튼 */}
+          <div className="flex flex-col space-y-4">
+            {/* 이미지 미리보기 */}
+            <div className="flex flex-col items-center">
+              <label className="block text-sm font-medium mb-1">책 표지</label>
+              <div className="border rounded-lg overflow-hidden flex justify-center items-center p-2 bg-gray-100 w-60 h-80">
+                <Image
+                  src={imageUrl || "/storybook/page1.png"}
+                  alt="책 표지"
+                  width={240}
+                  height={360}
+                  className="rounded-md"
+                />
               </div>
             </div>
-          </>
-        ) : (
-          <>
-            {/* 제목 */}
-            <h3 className="text-2xl font-bold text-center text-gray-800 mb-4">
-              독후감 작성
-            </h3>
 
-            {/* 2열 레이아웃 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-auto">
-              {/* 왼쪽: 제목, 내용 */}
-              <div className="flex flex-col space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    제목
-                  </label>
-                  <Input
-                    placeholder="책 제목을 입력하세요"
-                    className="w-full"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                  />
-                </div>
-                <div className="flex-grow flex flex-col">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    내용
-                  </label> 
-                  <Textarea
-                    placeholder="독후감 내용을 작성해주세요"
-                    className="w-full h-80 p-3 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary resize-none"
-                    value={body}
-                    onChange={(e) => setBody(e.target.value)}
-                  />              
-                </div>
-              </div>
+            {/* 별점 선택 영역 */}
+      
+          </div>
+        </div>
+      </div>
 
-              {/* 오른쪽: 이미지 미리보기, 별점 선택, 버튼 */}
-              <div className="flex flex-col space-y-4">
-                {/* 이미지 미리보기 */}
-                <div className="flex flex-col items-center">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    책 표지
-                  </label>
-                  <div className="border rounded-lg overflow-hidden flex justify-center items-center p-2 bg-gray-100 w-60 h-80">
-                    <Image
-                      src="/storybook/page1.png"
-                      alt="책 표지"
-                      width={240}
-                      height={360}
-                      className="rounded-md"
-                    />
-                  </div>
-                </div>
-
-                {/* 별점 선택 (5개의 별, 0.5 단위) */}
-                <div className="flex flex-col items-center space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    평점 (0.5 단위)
-                  </label>
-                  <div
-                    className="flex space-x-1"
-                    onMouseLeave={handleMouseLeave}
-                  >
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <div
-                        key={star}
-                        className="cursor-pointer"
-                        onMouseMove={(e) => handleMouseMove(e, star)}
-                        onClick={(e) => handleStarClick(e, star)}
-                      >
-                        {renderStar(star)}
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-sm text-gray-500">{rating}점 선택됨</p>
-                </div>
-
-                {/* 제출 / 취소 버튼 */}
-                <div className="flex justify-center space-x-4 pt-2 mt-auto">
-                  <Button onClick={handleSubmit}>
-                    제출하기
-                  </Button>
-                  <Button>
-                    취소하기
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </>
-        )}
+      {/* 댓글창 영역 */}
+      <div className="mt-8 w-full max-w-7xl rounded-lg shadow-lg p-6 mx-auto">
+        <h3 className="text-xl font-semibold mb-4">댓글</h3>
+        <Textarea
+          placeholder="댓글을 입력해주세요."
+          className="w-full p-3 border rounded-md resize-none"
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
+        />
+        <div className="flex justify-end mt-4">
+          <Button onClick={handleCommentSubmit}>댓글 등록</Button>
+        </div>
       </div>
     </div>
   );

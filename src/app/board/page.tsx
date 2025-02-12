@@ -20,9 +20,9 @@ export default function FreeBoardPage() {
     {
       id: number;
       title: string;
-      author: string;
-      date: string;
-      views: number;
+      writer: string;
+      score: number;
+      createdAt: string;
     }[]
   >([]);
 
@@ -38,11 +38,11 @@ export default function FreeBoardPage() {
         if (data.isSuccess) {
           // API의 result 배열 데이터를 게시글 형태로 매핑
           const fetchedPosts = data.result.map((item: any) => ({
-            id: item.bookstoreId,      // 게시글 ID로 bookstoreId 사용
-            title: item.title,         // 게시글 제목
-            author: "작성자 정보 없음", // API에 작성자 정보가 없으므로 기본 문자열 사용
-            date: "날짜 정보 없음",     // API에 작성일 정보가 없으므로 기본 문자열 사용
-            views: 0,                  // API에 조회수가 없으므로 기본값 0 사용
+            id: item.bookstoreId,       // 게시글 번호로 bookstoreId 사용
+            title: item.title,          // 게시글 제목
+            writer: item.writer,        // 게시글 작성자
+            score: item.score,          // 게시글 스코어
+            createdAt: item.createdAt,  // 게시글 날짜
           }));
           setPosts(fetchedPosts);
         } else {
@@ -60,6 +60,35 @@ export default function FreeBoardPage() {
     setSelectedPosts((prev: number[]) =>
       prev.includes(postId) ? prev.filter((id: number) => id !== postId) : [...prev, postId]
     );
+  };
+
+  // 선택된 게시글들을 삭제하는 핸들러
+  const handleDeletePosts = async () => {
+    if (selectedPosts.length === 0) {
+      console.warn("삭제할 게시글을 선택하세요.");
+      return;
+    }
+    try {
+      // 선택한 게시글들의 boardId를 DELETE 요청으로 보냅니다.
+      for (const id of selectedPosts) {
+        const response = await fetch("/api/board", {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ boardId: id }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          console.error(`게시글 ${id} 삭제 실패:`, data.error);
+        }
+      }
+      // 삭제된 게시글들을 화면에서 제거
+      setPosts((prevPosts) => prevPosts.filter((post) => !selectedPosts.includes(post.id)));
+      setSelectedPosts([]);
+    } catch (error) {
+      console.error("게시글 삭제 중 오류 발생:", error);
+    }
   };
 
   return (
@@ -81,42 +110,42 @@ export default function FreeBoardPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">
+                <TableHead className="w-10 text-center align-middle">
                   <input
                     type="checkbox"
                     // 전체 선택/해제 로직은 필요에 따라 추가하세요.
                     disabled
                   />
                 </TableHead>
-                <TableHead>번호</TableHead>
-                <TableHead>제목</TableHead>
-                <TableHead>작성자</TableHead>
-                <TableHead>작성일</TableHead>
-                <TableHead>조회수</TableHead>
+                <TableHead className="text-center align-middle">번호</TableHead>
+                <TableHead className="text-center align-middle">제목</TableHead>
+                <TableHead className="text-center align-middle">작성자</TableHead>
+                <TableHead className="text-center align-middle">스코어</TableHead>
+                <TableHead className="text-center align-middle">날짜</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {posts.map((post) => (
                 <TableRow key={post.id}>
-                  <TableCell className="text-center">
+                  <TableCell className="text-center align-middle">
                     <input
                       type="checkbox"
                       checked={selectedPosts.includes(post.id)}
                       onChange={() => handleCheckboxChange(post.id)}
                     />
                   </TableCell>
-                  <TableCell className="text-center">{post.id}</TableCell>
-                  <TableCell className="text-center">
+                  <TableCell className="text-center align-middle">{post.id}</TableCell>
+                  <TableCell className="text-center align-middle">
                     <Link
-                      href={`/post/${post.id}`}
+                      href={`/board/${post.id}`}
                       className="cursor-pointer hover:underline"
                     >
                       {post.title}
                     </Link>
                   </TableCell>
-                  <TableCell className="text-center">{post.author}</TableCell>
-                  <TableCell className="text-center">{post.date}</TableCell>
-                  <TableCell className="text-center">{post.views}</TableCell>
+                  <TableCell className="text-center align-middle">{post.writer}</TableCell>
+                  <TableCell className="text-center align-middle">{post.score}</TableCell>
+                  <TableCell className="text-center align-middle">{post.createdAt}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -125,8 +154,10 @@ export default function FreeBoardPage() {
 
         {/* 하단 버튼 영역 */}
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
-          <Button>글쓰기</Button>
-          <Button>글삭제</Button>
+          <Link href="/createboard">
+            <Button>글쓰기</Button>
+          </Link>
+          <Button onClick={handleDeletePosts}>글삭제</Button>
         </div>
       </div>
     </section>

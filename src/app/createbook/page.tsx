@@ -243,7 +243,7 @@ function MainTestPage() {
   if (isLoading && !storyBook) {
     return (
       <div className="container mx-auto px-4 sm:px-8 md:px-20 relative">
-        <div className="relative bg-white p-8 rounded-lg shadow-lg">
+        <div className="relative p-8 rounded-lg shadow-lg">
           <div className="text-start mb-6">
             <h1 className="text-3xl font-bold">
               MOAI가 열심히 동화책을 생성하는 중이에요...

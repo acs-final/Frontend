@@ -1,6 +1,7 @@
 "use client"; // ✅ 클라이언트 컴포넌트 설정
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
@@ -81,13 +82,58 @@ const HalfStar = () => (
 );
 
 export default function ReviewPage() {
+  const { id } = useParams();
+  const [title, setTitle] = useState(""); // API로부터 가져올 제목
+  const [body, setBody] = useState(""); // API로부터 가져올 내용
   const [rating, setRating] = useState(0); // ⭐ 실제 선택된 평점
   const [hoverRating, setHoverRating] = useState(0); // ⭐ 마우스 오버 상태
   const [submitted, setSubmitted] = useState(false);
+  const [imageUrl, setImageUrl] = useState(""); // API로부터 가져올 이미지 URL
   // 현재 보여줄 평점: hover 상태가 있으면 hoverRating, 아니면 rating
   const currentRating = hoverRating || rating;
 
-  // 별 아이콘 내부에서 마우스 클릭 위치에 따라 반/전채 선택
+  // API 호출: /api/book/[id] 로 게시글 데이터 가져오기
+  useEffect(() => {
+    if (id) {
+      async function fetchBook() {
+        try {
+          const res = await fetch(`/api/board/${id}`);
+          if (!res.ok) {
+            console.error("HTTP 오류:", res.status);
+            return;
+          }
+          const data = await res.json();
+          console.log(data);
+          if (data.isSuccess) {
+            setTitle(data.result.title);
+  
+            // body가 객체라면 필요한 속성(text 등)만 추출하고, 문자열이면 그대로 사용
+            setBody(
+              typeof data.result.body === "object" && data.result.body !== null
+                ? data.result.body.text
+                : data.result.body
+            );
+  
+            setRating(data.result.score);
+  
+            // imageUrl이 객체라면 필요한 속성(url 등)만 추출하고, 문자열이면 그대로 사용
+            setImageUrl(
+              typeof data.result.imageUrl === "object" && data.result.imageUrl !== null
+                ? data.result.imageUrl.url
+                : data.result.imageUrl
+            );
+          } else {
+            console.error("게시글 불러오기 실패:", data.message || data);
+          }
+        } catch (error) {
+          console.error("게시글 불러오기 에러:", error);
+        }
+      }
+      fetchBook();
+    }
+  }, [id]);
+
+  // 별 아이콘 내부에서 마우스 클릭 위치에 따라 반/전체 선택
   const handleStarClick = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
     star: number
@@ -137,11 +183,11 @@ export default function ReviewPage() {
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen p-4">
-      <div className="w-full max-w-7xl rounded-lg shadow-lg p-6 mx-auto flex flex-col">
+      <div className="w-full max-w-7xl bg-white rounded-lg shadow-lg p-6 mx-auto flex flex-col">
         {submitted ? (
           <>
             {/* 제목 */}
-            <h3 className="text-2xl font-bold text-center mb-4">
+            <h3 className="text-2xl font-bold text-center text-gray-800 mb-4">
               도서 추천
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-auto">
@@ -154,7 +200,7 @@ export default function ReviewPage() {
                 </div>
                 <div className="flex flex-col space-y-4 w-full max-w-lg">
                   {/* 추천 도서 이동 */}
-                  <div className="p-6 rounded-lg flex flex-col items-start">
+                  <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-start">
                     <p className="text-lg font-semibold">크레딧을 획득하셨습니다!</p>
                     독후감을 작성하셨군요! 100 크레딧을 모으면 동화책을 생성할 수 있습니다.
                     <div className="self-end flex justify-center space-x-2">
@@ -167,7 +213,7 @@ export default function ReviewPage() {
                     </div>
                   </div>
                   {/* 마이페이지 이동 */}
-                  <div className="p-6 rounded-lg flex flex-col items-start">
+                  <div className="bg-gray-100 p-6 rounded-lg flex flex-col items-start">
                     <p className="text-lg font-semibold">비슷한 책을 추천받고 싶으세요?</p>
                     생성한 책과 비슷한 책을 추천해드려요!!
                     <div className="self-end flex justify-center space-x-2">
@@ -185,12 +231,12 @@ export default function ReviewPage() {
               <div className="flex flex-col space-y-4">
                 {/* 이미지 미리보기 */}
                 <div className="flex flex-col items-center">
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     책 표지
                   </label>
-                  <div className="border rounded-lg overflow-hidden flex justify-center items-center p-2 w-80 h-96">
+                  <div className="border rounded-lg overflow-hidden flex justify-center items-center p-2 bg-gray-100 w-80 h-96">
                     <Image
-                      src="/storybook/page1.png"
+                      src={imageUrl || "/storybook/page1.png"}
                       alt="책 표지"
                       width={240}
                       height={360}
@@ -201,7 +247,7 @@ export default function ReviewPage() {
 
                 {/* 별점 선택 (5개의 별, 0.5 단위) */}
                 <div className="flex flex-col items-center space-y-2">
-                  <label className="block text-sm font-medium">
+                  <label className="block text-sm font-medium text-gray-700">
                     평점 (0.5 단위)
                   </label>
                   <div
@@ -219,7 +265,7 @@ export default function ReviewPage() {
                       </div>
                     ))}
                   </div>
-                  <p className="text-sm">{rating}점 선택됨</p>
+                  <p className="text-sm text-gray-500">{rating}점 선택됨</p>
                 </div>
 
                 {/* 제출 / 취소 버튼 */}
@@ -237,7 +283,7 @@ export default function ReviewPage() {
         ) : (
           <>
             {/* 제목 */}
-            <h3 className="text-2xl font-bold text-center mb-4">
+            <h3 className="text-2xl font-bold text-center text-gray-800 mb-4">
               독후감 작성
             </h3>
 
@@ -246,16 +292,26 @@ export default function ReviewPage() {
               {/* 왼쪽: 제목, 내용 */}
               <div className="flex flex-col space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     제목
                   </label>
-                  <Input placeholder="책 제목을 입력하세요" className="w-full" />
+                  <Input
+                    placeholder="책 제목을 입력하세요"
+                    className="w-full"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
                 </div>
                 <div className="flex-grow flex flex-col">
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     내용
                   </label> 
-                  <Textarea placeholder="독후감 내용을 작성해주세요" className="w-full h-80 p-3 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary resize-none"/>              
+                  <Textarea
+                    placeholder="독후감 내용을 작성해주세요"
+                    className="w-full h-80 p-3 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary resize-none"
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                  />              
                 </div>
               </div>
 
@@ -263,12 +319,12 @@ export default function ReviewPage() {
               <div className="flex flex-col space-y-4">
                 {/* 이미지 미리보기 */}
                 <div className="flex flex-col items-center">
-                  <label className="block text-sm font-medium mb-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
                     책 표지
                   </label>
-                  <div className="border rounded-lg overflow-hidden flex justify-center items-center p-2 w-60 h-80">
+                  <div className="border rounded-lg overflow-hidden flex justify-center items-center p-2 bg-gray-100 w-60 h-80">
                     <Image
-                      src="/storybook/page1.png"
+                      src={imageUrl || "/storybook/page1.png"}
                       alt="책 표지"
                       width={240}
                       height={360}
@@ -279,7 +335,7 @@ export default function ReviewPage() {
 
                 {/* 별점 선택 (5개의 별, 0.5 단위) */}
                 <div className="flex flex-col items-center space-y-2">
-                  <label className="block text-sm font-medium">
+                  <label className="block text-sm font-medium text-gray-700">
                     평점 (0.5 단위)
                   </label>
                   <div
@@ -297,7 +353,7 @@ export default function ReviewPage() {
                       </div>
                     ))}
                   </div>
-                  <p className="text-sm">{rating}점 선택됨</p>
+                  <p className="text-sm text-gray-500">{rating}점 선택됨</p>
                 </div>
 
                 {/* 제출 / 취소 버튼 */}
