@@ -35,13 +35,24 @@ export default function MyPage() {
               onChange={(e) => setNewNickname(e.target.value)}
               className="w-full border border-gray-300 p-2 rounded-md"
             />
-            <Button onClick={handleNicknameChange} className="mt-2">
+            {/* <Button onClick={handleNicknameChange} className="mt-2">
               닉네임 변경
-            </Button>
+            </Button> */}
           </div>
-
-          {/* 크레딧 영역 (읽기 전용) */}
           <div>
+            <label className="block text-lg font-semibold mb-2">이름</label>
+            <input
+              type="text"
+              value={newNickname || nickname}
+              onChange={(e) => setNewNickname(e.target.value)}
+              className="w-full border border-gray-300 p-2 rounded-md"
+            />
+            {/* <Button onClick={handleNicknameChange} className="mt-2">
+              닉네임 변경
+            </Button> */}
+          </div>
+          {/* 크레딧 영역 (읽기 전용) */}
+          {/* <div>
             <label className="block text-lg font-semibold mb-2">크레딧</label>
             <input
               type="text"
@@ -49,7 +60,7 @@ export default function MyPage() {
               readOnly
               className="w-full border border-gray-300 p-2 rounded-md bg-gray-100"
             />
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

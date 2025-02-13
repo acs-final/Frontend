@@ -113,6 +113,12 @@ function MainTestPage() {
     setIsLoading(true);
 
     try {
+      // sessionStorage에서 "sub" 및 "accessToken" 값을 추출합니다.
+      const memberId = sessionStorage.getItem("sub");
+      const accessToken = sessionStorage.getItem("accessToken");
+      console.log("page memberId:", memberId);
+      console.log("page accessToken:", accessToken);
+
       // 카테고리가 "직업 동화"이면 선택된 직업 값을 붙여서 genre를 생성합니다.
       const genre =
         data.category === "직업 동화" && data.job
@@ -127,7 +133,11 @@ function MainTestPage() {
 
       const response = await fetch("/api/createbook", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "memberId": memberId || "",
+          // "accessToken": accessToken || ""
+        },
         body: JSON.stringify(requestBody),
       });
 

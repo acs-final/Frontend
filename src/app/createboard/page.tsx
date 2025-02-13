@@ -176,9 +176,28 @@ export default function ReviewPage() {
     }
   };
 
-  const handleSubmit = () => {
-    // 제출 로직 추가 (필요한 경우 작성)
-    console.log("제출됨");
+  const handleSubmit = async () => {
+    // sessionStorage에서 'sub' 값을 가져와 memberId로 설정
+    const memberId = sessionStorage.getItem("sub");
+    console.log("memberId:", memberId);
+
+    // 게시글 관련 데이터를 body에 담아 /api/createbook 엔드포인트로 POST 요청 실행
+    const response = await fetch("/api/createbook", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        // memberId 값을 헤더로 전달
+        "memberId": memberId || "",
+      },
+      body: JSON.stringify({ title, body, rating }),
+    });
+
+    if (response.ok) {
+      console.log("게시글 생성 성공");
+      // 필요에 따라 추가 동작 (예: 페이지 이동, 알림 표시 등) 수행
+    } else {
+      console.error("게시글 생성 실패");
+    }
   };
 
   return (

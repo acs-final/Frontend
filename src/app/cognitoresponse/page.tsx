@@ -1,7 +1,7 @@
 "use client"; // 클라이언트 사이드에서 실행할 경우 추가 (React 훅 사용시 필요)
 
 import React, { useEffect } from "react";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 import qs from "querystring";
 import { useRouter } from "next/navigation"; // Next.js 내비게이션 훅 추가
 
@@ -49,7 +49,7 @@ export default function CognitoResponsePage() {
         );
 
         console.log("응답:", response);
-        console.log("토큰 응답:", response.data);
+        // console.log("토큰 응답:", response.data);
 
         // 세션스토리지에 토큰 저장
         sessionStorage.setItem("token", JSON.stringify(response.data));
@@ -63,11 +63,25 @@ export default function CognitoResponsePage() {
         sessionStorage.setItem("username", decoded.username);
         sessionStorage.setItem("sub", decoded.sub);
 
+        // console.log("accessToken:", response.data.access_token);
+        // console.log("sub:", decoded.sub);
+        // const memberId = sessionStorage.getItem("sub");
+        // console.log("memberId:", memberId);
+
+        const memberCookie = sessionStorage.getItem("sub");
+        if (memberCookie) {
+          document.cookie = `memberCookie=${memberCookie}; path=/; max-age=3600;`;
+        }
+        // access token을 /account로 POST 요청하여 서버로 전송
+        // await axios.post("/account", {
+        //   accessToken: response.data.access_token,
+        // });
+
         // 세션스토리지 저장 완료 후 커스텀 이벤트 디스패치
-        window.dispatchEvent(new Event("sessionCleared"));
+        // window.dispatchEvent(new Event("sessionCleared"));
 
         // 세션스토리지 저장 완료 후 /createbook으로 이동
-        router.push("/createbook");
+        router.push("/login");
       } catch (error: any) {
         if (error.response) {
           console.error("토큰 교환 에러:", error.response.data);
