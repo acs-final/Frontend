@@ -61,25 +61,6 @@ export default function BookRecommendationPage() {
           </h1>
         </div>
 
-        {/* 추천 기준 박스
-        <div className="p-6 rounded-lg shadow-lg mb-8">
-          <h2 className="text-2xl font-bold mb-4">추천 기준</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div className="text-center md:text-left">
-              <p className="text-lg font-semibold">장르</p>
-              <p className="text-lg">{criteria.category}</p>
-            </div>
-            <div className="text-center md:text-left">
-              <p className="text-lg font-semibold">성별</p>
-              <p className="text-lg">{criteria.gender}</p>
-            </div>
-            <div className="text-center md:text-left">
-              <p className="text-lg font-semibold">테마</p>
-              <p className="text-lg">{criteria.theme}</p>
-            </div>
-          </div>
-        </div> */}
-
         {/* 책 추천 리스트 */}
         <div>
           <h2 className="text-2xl font-bold mb-4 text-center md:text-left">

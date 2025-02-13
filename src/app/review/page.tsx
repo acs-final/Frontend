@@ -174,7 +174,7 @@ export default function ReviewPage() {
                       <Button variant="outline" onClick={() => window.location.href = '/recommended'}>
                         닫기
                       </Button>
-                      <Button onClick={() => window.location.href = '/recommended'}>
+                      <Button onClick={() => window.location.href = '/recommended_yes24'}>
                         추천받기
                       </Button>
                     </div>

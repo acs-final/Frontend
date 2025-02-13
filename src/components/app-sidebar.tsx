@@ -27,6 +27,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { useDarkMode } from "@/hooks/useDarkMode"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // 사용자 정보를 state로 관리합니다.
@@ -50,19 +51,27 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // 컴포넌트가 마운트될 때 및 sessionCleared 이벤트 발생 시 사용자 정보를 불러옵니다.
   React.useEffect(() => {
     // 초기 로드
-    loadUserFromSession();
+    loadUserFromSession()
 
     // sessionCleared 이벤트 구독
     const handleSessionCleared = () => {
-      loadUserFromSession();
+      loadUserFromSession()
     }
-    window.addEventListener("sessionCleared", handleSessionCleared);
+    window.addEventListener("sessionCleared", handleSessionCleared)
 
     // 클린업
     return () => {
-      window.removeEventListener("sessionCleared", handleSessionCleared);
+      window.removeEventListener("sessionCleared", handleSessionCleared)
     }
-  }, [loadUserFromSession]);
+  }, [loadUserFromSession])
+
+  // 다크 모드 여부 감지
+  const isDarkMode = useDarkMode()
+  
+  // 디버깅을 위한 콘솔 로그 추가
+  React.useEffect(() => {
+    console.log("다크모드 상태:", isDarkMode)
+  }, [isDarkMode])
 
   const data = {
     user,
@@ -85,7 +94,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         title: "도서추천",
-        url: "recommended",
+        url: "/recommended",
         icon: Settings2,
       },
     ],
@@ -111,8 +120,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton size="lg" asChild>
               <a href="/">
                 <div className="flex items-center justify-start w-full">
-                <p className="text-5xl font-bold tracking-wider">MOAI</p>
-                  {/* <img src="/moai.png" alt="Moai Logo" className="w-[70%] h-auto" /> */}
+                  <img
+                    src={isDarkMode ? "/moai_dark.png" : "/moai.png"}
+                    alt="Moai Logo"
+                    className="w-[70%] h-auto"
+                  />
                 </div>
               </a>
             </SidebarMenuButton>
