@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,23 +15,64 @@ import {
   TableBody,
 } from "@/components/ui/table";
 
+// API에서 받아올 데이터의 타입 정의 (필요한 필드만)
+interface Book {
+  fairytaleId: number;
+  title: string;
+  hasReport: boolean;
+  score: number;
+}
+
 export default function MyBookStorePage() {
-  // 예시 데이터: 내 동화책 목록
-  const [books, setBooks] = useState([
-    { id: 1, title: "동화책 1", reportStatus: "작성", rating: 4 },
-    { id: 2, title: "동화책 2", reportStatus: "미작성", rating: 1 },
-    { id: 3, title: "동화책 3", reportStatus: "작성", rating: 5 },
-  ]);
+  // 책 목록 상태를 빈 배열로 초기화
+  const [books, setBooks] = useState<Book[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  // 선택된 동화책 ID 상태 (radio 버튼을 통해 선택)
+  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
 
-  // 선택한 행들을 관리하기 위한 상태 (체크박스)
-  const [selectedBooks, setSelectedBooks] = useState<number[]>([]);
+  const router = useRouter();
 
-  const handleCheckboxChange = (bookId: number): void => {
-    setSelectedBooks((prev: number[]) =>
-      prev.includes(bookId)
-        ? prev.filter((id: number) => id !== bookId)
-        : [...prev, bookId]
-    );
+  // 페이지 접근 시 API 호출하여 데이터 가져오기
+  useEffect(() => {
+    setIsLoading(true);
+    fetch("/api/mybookstore")
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.isSuccess) {
+          // API 응답의 result 필드가 책 목록임
+          setBooks(data.result);
+        } else {
+          setError(data.message || "데이터를 가져오는데 실패했습니다.");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("네트워크 오류 발생");
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  // 로딩 또는 에러 상태 처리
+  if (isLoading) return <p className="p-4 sm:p-8">로딩중...</p>;
+  if (error) return <p className="p-4 sm:p-8">에러: {error}</p>;
+
+  // 읽기 버튼 클릭 시 선택된 책의 id로 /boo/[id] 페이지로 이동
+  const handleReadBook = () => {
+    if (selectedBookId === null) {
+      alert("동화책을 선택해주세요!");
+      return;
+    }
+    router.push(`/book/${selectedBookId}`);
+  };
+
+  // 독후감 쓰기 버튼 클릭 시 선택된 책의 id로 /review/[id] 페이지로 이동
+  const handleWriteReview = () => {
+    if (selectedBookId === null) {
+      alert("동화책을 선택해주세요!");
+      return;
+    }
+    router.push(`/review/${selectedBookId}`);
   };
 
   return (
@@ -51,49 +93,39 @@ export default function MyBookStorePage() {
           </div>
         </div>
 
-        {/* 테이블 영역 (overflow-x-auto 로 스크롤 지원) */}
+        {/* API 응답 데이터를 표시하는 테이블 영역 */}
         <div className="overflow-x-auto mb-8">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-10">
-                  <input
-                    type="checkbox"
-                    // 전체 선택/해제 로직은 필요에 따라 추가하세요.
-                    disabled
-                  />
-                </TableHead>
-                <TableHead>내 동화책 (ID)</TableHead>
-                <TableHead>제목</TableHead>
-                <TableHead>독후감 작성</TableHead>
-                <TableHead>평점</TableHead>
+                {/* 라디오 박스를 위한 헤더 (선택) */}
+                <TableHead className="text-center">선택</TableHead>
+                <TableHead className="text-center">동화책 ID</TableHead>
+                <TableHead className="text-center">제목</TableHead>
+                <TableHead className="text-center">독후감 작성 여부</TableHead>
+                <TableHead className="text-center">평점</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {books.map((book) => (
-                <TableRow key={book.id}>
+                <TableRow key={book.fairytaleId}>
+                  {/* 라디오 버튼: 선택하면 해당 동화책의 ID가 상태에 저장됨 */}
                   <TableCell className="text-center">
                     <input
-                      type="checkbox"
-                      checked={selectedBooks.includes(book.id)}
-                      onChange={() => handleCheckboxChange(book.id)}
+                      type="radio"
+                      name="selectedBook"
+                      value={book.fairytaleId}
+                      checked={selectedBookId === book.fairytaleId}
+                      onChange={() => setSelectedBookId(book.fairytaleId)}
                     />
                   </TableCell>
-                  <TableCell className="text-center">{book.id}</TableCell>
+                  <TableCell className="text-center">{book.fairytaleId}</TableCell>
+                  <TableCell className="text-center">{book.title}</TableCell>
                   <TableCell className="text-center">
-                    {/* 제목 클릭 시 /book/{id} 페이지로 이동 */}
-                    <Link
-                      href={`/book/${book.id}`}
-                      className="cursor-pointer hover:underline"
-                    >
-                      {book.title}
-                    </Link>
+                    {book.hasReport ? "작성됨" : "미작성"}
                   </TableCell>
                   <TableCell className="text-center">
-                    {book.reportStatus}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {book.rating > 0 ? book.rating : "-"}
+                    {book.score > 0 ? book.score : "-"}
                   </TableCell>
                 </TableRow>
               ))}
@@ -103,8 +135,8 @@ export default function MyBookStorePage() {
 
         {/* 하단 버튼 영역 (반응형: 모바일은 세로, 데스크탑은 가로 정렬) */}
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8">
-          <Button>독후감쓰기</Button>
-          <Button>읽기</Button>
+          <Button onClick={handleWriteReview}>독후감쓰기</Button>
+          <Button onClick={handleReadBook}>읽기</Button>
         </div>
       </div>
     </section>

@@ -46,13 +46,13 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <title>My App</title>
+        <title>MOAI</title>
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ThemeProviderWrapper>
+        <ClientProviders>
           <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
@@ -65,11 +65,11 @@ export default function RootLayout({
                 </div>
               </header>
               <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                <ClientProviders>{children}</ClientProviders>
+                {children}
               </div>
             </SidebarInset>
           </SidebarProvider>
-        </ThemeProviderWrapper>
+        </ClientProviders>
       </body>
     </html>
   );

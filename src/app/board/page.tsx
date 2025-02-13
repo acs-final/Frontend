@@ -13,6 +13,7 @@ import {
   TableRow,
   TableBody,
 } from "@/components/ui/table";
+import { Toaster } from "@/components/ui/toaster"
 
 export default function FreeBoardPage() {
   // 초기 데이터는 빈 배열로 시작하며, API에서 받아온 데이터를 사용합니다.
@@ -28,6 +29,8 @@ export default function FreeBoardPage() {
 
   // 선택한 행들을 관리하기 위한 상태 (체크박스)
   const [selectedPosts, setSelectedPosts] = useState<number[]>([]);
+  // useToast 훅을 통해 toast 함수 사용
+  // const { toast } = useToast();
 
   // /api/board API로부터 데이터를 가져와서 게시글 형태로 변환하는 useEffect
   useEffect(() => {
@@ -65,29 +68,26 @@ export default function FreeBoardPage() {
   // 선택된 게시글들을 삭제하는 핸들러
   const handleDeletePosts = async () => {
     if (selectedPosts.length === 0) {
-      console.warn("삭제할 게시글을 선택하세요.");
       return;
     }
     try {
-      // 선택한 게시글들의 boardId를 DELETE 요청으로 보냅니다.
       for (const id of selectedPosts) {
-        const response = await fetch("/api/board", {
+        const response = await fetch(`/api/deleteboard/${id}`, {
           method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ boardId: id }),
         });
         const data = await response.json();
         if (!response.ok) {
           console.error(`게시글 ${id} 삭제 실패:`, data.error);
+
         }
       }
       // 삭제된 게시글들을 화면에서 제거
       setPosts((prevPosts) => prevPosts.filter((post) => !selectedPosts.includes(post.id)));
       setSelectedPosts([]);
+
     } catch (error) {
       console.error("게시글 삭제 중 오류 발생:", error);
+
     }
   };
 
@@ -159,6 +159,7 @@ export default function FreeBoardPage() {
           </Link>
           <Button onClick={handleDeletePosts}>글삭제</Button>
         </div>
+        <Toaster />
       </div>
     </section>
   );

@@ -7,27 +7,31 @@ export default function LogoutPage() {
   const router = useRouter();
 
   useEffect(() => {
-    async function handleLogout() {
+    const handleLogout = async () => {
       try {
-        // /api/logout API 호출 (서버 측 로그아웃 처리)
-        await fetch('/api/logout', { method: 'POST' });
+        // 로그아웃 API 호출 (필요한 경우 credentials 옵션 추가)
+        await fetch('/api/logout', { 
+          method: 'POST',
+          credentials: 'include'  // 쿠키를 함께 보내야 한다면 활성화
+        });
       } catch (error) {
         console.error("로그아웃 API 호출 실패:", error);
       } finally {
-        // 클라이언트 측의 세션 스토리지 초기화 등 추가 처리가 필요한 경우 수행
-        if (typeof window !== "undefined") {
-          sessionStorage.clear();
+        // 클라이언트 측 세션 스토리지 초기화 및 이벤트 디스패치
+        sessionStorage.clear();
+        window.dispatchEvent(new Event("sessionCleared"));
 
-          // 세션 초기화 이벤트 디스패치 (필요한 경우)
-          const event = new Event("sessionCleared");
-          window.dispatchEvent(event);
-        }
         // 로그아웃 후 홈 페이지로 이동
         router.replace("/");
       }
-    }
+    };
+
     handleLogout();
   }, [router]);
 
-  return <div>로그아웃 중입니다... 잠시만 기다려주세요.</div>;
+  return (
+    <div>
+      로그아웃 중입니다... 잠시만 기다려주세요.
+    </div>
+  );
 }

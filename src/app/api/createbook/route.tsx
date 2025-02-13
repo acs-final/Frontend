@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     // 환경 변수에서 외부 API URL을 가져오거나 기본값 사용
     const externalApiUrl =
-      process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1/fairytale/sonnet";
+      process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1/fairytale/sonnetaaa";
 
     // 외부 API 호출 (실제 URL 및 요청 데이터에 맞게 수정)
     const externalResponse = await fetch(externalApiUrl, {

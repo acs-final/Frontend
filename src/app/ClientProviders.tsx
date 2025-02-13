@@ -1,5 +1,6 @@
 "use client";
 import { AuthProvider } from "react-oidc-context";
+import { ThemeProviderWrapper } from "./ThemeProvider";
 
 // OpenID Connect 설정 값
 const oidcConfiguration = {
@@ -17,5 +18,9 @@ export default function ClientProviders({
 }: {
   children: React.ReactNode;
 }) {
-  return <AuthProvider {...oidcConfiguration}>{children}</AuthProvider>;
+  return (
+    <AuthProvider {...oidcConfiguration}>
+      <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+    </AuthProvider>
+  );
 } 

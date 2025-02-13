@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { DollarSign } from "lucide-react";
 import Image from "next/image";
+import { Toaster } from "@/components/ui/toaster"
+import { useToast } from "@/hooks/use-toast";
 
 
 
@@ -91,6 +93,13 @@ export default function ReviewPage() {
   // 현재 보여줄 평점: hover 상태가 있으면 hoverRating, 아니면 rating
   const currentRating = hoverRating || rating;
 
+  // 책 목록 관련 상태 (내 책서점 API 결과)
+  const [bookList, setBookList] = useState<any[]>([]);
+  const [selectedBook, setSelectedBook] = useState<any>(null);
+
+  // <useToast> 훅을 통해 toast 함수를 받아옴
+  const { toast } = useToast();
+
   // API 호출: /api/board/[id] 로 게시글 데이터 가져오기
   useEffect(() => {
     if (id) {
@@ -131,6 +140,45 @@ export default function ReviewPage() {
       fetchBoard();
     }
   }, [id]);
+
+  // 내 책서점 API 호출: /api/mybookstore 에 GET 요청
+  useEffect(() => {
+    async function fetchMyBookstore() {
+      try {
+        const res = await fetch("/api/mybookstore");
+        if (!res.ok) {
+          console.error("HTTP 오류:", res.status);
+          return;
+        }
+        const data = await res.json();
+        if (data.isSuccess) {
+          setBookList(data.result);
+          if (data.result && data.result.length > 0) {
+            // 첫 번째 책을 기본 선택값으로 설정
+            setSelectedBook(data.result[0]);
+            setTitle(data.result[0].title);
+            setImageUrl(data.result[0].imageUrl);
+          }
+        } else {
+          console.error("책 정보 불러오기 실패:", data.message || data);
+        }
+      } catch (error) {
+        console.error("책 정보 불러오기 에러:", error);
+      }
+    }
+    fetchMyBookstore();
+  }, []);
+
+  // 셀렉트 박스 값 변경 시 선택한 책으로 업데이트
+  const handleSelectBook = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = parseInt(e.target.value);
+    const book = bookList.find((item) => item.fairytaleId === selectedId);
+    if (book) {
+      setSelectedBook(book);
+      setTitle(book.title);
+      setImageUrl(book.imageUrl);
+    }
+  };
 
   // 별 아이콘 내부에서 마우스 클릭 위치에 따라 반/전체 선택
   const handleStarClick = (
@@ -181,19 +229,28 @@ export default function ReviewPage() {
     const memberId = sessionStorage.getItem("sub");
     console.log("memberId:", memberId);
 
-    // 게시글 관련 데이터를 body에 담아 /api/createbook 엔드포인트로 POST 요청 실행
-    const response = await fetch("/api/createbook", {
+    // 게시글 관련 데이터를 body에 담아 /api/createboard 엔드포인트로 POST 요청 실행
+    const response = await fetch("/api/createboard", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         // memberId 값을 헤더로 전달
         "memberId": memberId || "",
       },
-      body: JSON.stringify({ title, body, rating }),
+      body: JSON.stringify({
+        title,
+        body,
+        score: rating,
+        fairytaleId: selectedBook ? selectedBook.fairytaleId : 0,
+        imageUrl,
+      }),
     });
 
     if (response.ok) {
       console.log("게시글 생성 성공");
+      toast({
+        title: "게시글 생성 성공"
+      });
       // 필요에 따라 추가 동작 (예: 페이지 이동, 알림 표시 등) 수행
     } else {
       console.error("게시글 생성 실패");
@@ -229,10 +286,22 @@ export default function ReviewPage() {
             </div>
           </div>
 
-          {/* 오른쪽: 이미지 미리보기, 별점 선택, 버튼 */}
+          {/* 오른쪽: 책 선택/책 표지, 별점 선택, 버튼 */}
           <div className="flex flex-col space-y-4">
-            {/* 이미지 미리보기 */}
+            {/* 책 선택 및 책 표지 */}
             <div className="flex flex-col items-center">
+              <label className="block text-sm font-medium mb-1">책 선택</label>
+              <select
+                value={selectedBook ? selectedBook.fairytaleId : ""}
+                onChange={handleSelectBook}
+                className="mt-1 mb-4 border rounded-md p-2"
+              >
+                {bookList.map((book) => (
+                  <option key={book.fairytaleId} value={book.fairytaleId}>
+                    {book.title}
+                  </option>
+                ))}
+              </select>
               <label className="block text-sm font-medium mb-1">책 표지</label>
               <div className="border rounded-lg overflow-hidden flex justify-center items-center p-2 bg-gray-100 w-60 h-80">
                 <Image
@@ -266,11 +335,12 @@ export default function ReviewPage() {
             {/* 제출 / 취소 버튼 */}
             <div className="flex justify-center space-x-4 pt-2 mt-auto">
               <Button onClick={handleSubmit}>제출하기</Button>
-              <Button>취소하기</Button>
+              <Button onClick={() => (window.location.href = '/board')}>취소하기</Button>
             </div>
           </div>
         </div>
       </div>
+      <Toaster />
     </div>
   );
 }
