@@ -58,8 +58,9 @@ export async function POST(
 
     console.log("📌 [게시판 API] 유효한 요청 데이터 확인 완료:", reqBody);
 
-    // ✅ 외부 API URL 설정
-    const externalApiUrl = `http://192.168.2.141:8080/v1/comment/${id}`;
+    // ✅ 외부 API URL 설정 변경 (환경변수 우선 사용)
+    const externalApiBaseUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+    const externalApiUrl = `${externalApiBaseUrl}/comment/${id}`;
     console.log(`📌 [게시판 API] 외부 API 요청: ${externalApiUrl}`);
 
     // ✅ 외부 API로 요청 보내기 (`memberCookie` 포함)

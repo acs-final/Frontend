@@ -9,8 +9,12 @@ export default function LogoutPage() {
   useEffect(() => {
     async function handleLogin() {
       try {
-        // /api/logout API 호출 (서버 측 로그아웃 처리)
-        await fetch('/api/login', { method: 'POST' });
+        const response = await fetch('/api/login', { method: 'POST' });
+        // 응답(response)을 JSON 형태로 읽기
+        const data = await response.json();
+        console.log("로그인 응답:", data);
+        console.log("로그인 result color:", data.result.color);
+        sessionStorage.setItem("color", data.result.color);
       } catch (error) {
         console.error("로그인 API 호출 실패:", error);
       } finally {

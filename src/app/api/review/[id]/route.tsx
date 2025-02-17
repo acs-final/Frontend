@@ -1,13 +1,22 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    // console.log("body:", body);
+    const cookieStore = await cookies();
+    const memberCookie = cookieStore.get("memberCookie")?.value;
+    const externalApiUrl = process.env.EXTERNAL_API_URL
+      ? `${process.env.EXTERNAL_API_URL.replace(/\/+$/, "")}/v1/reports/`
+      : "http://192.168.2.141:8080/v1/reports/";
 
-    // accessToken을 포워딩할 URL로 전달합니다.
-    const response = await fetch(`http://192.168.2.141:8080/v1/fairytale/${id}/score`, {
+    const response = await fetch(externalApiUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "memberId": memberCookie ?? "",
+      },
       body: JSON.stringify(body),
     });
 
@@ -23,11 +32,11 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(
-      { message: "Access token이 성공적으로 전달되었습니다.", result: forwardedResult },
+      { message: "독후감 제출 성공", result: forwardedResult },
       { status: 200 }
     );
   } catch (error) {
-    console.error("API /logout POST 에러:", error);
+    console.error("API /review POST 에러:", error);
     return NextResponse.json(
       { error: "서버 에러가 발생했습니다." },
       { status: 500 }

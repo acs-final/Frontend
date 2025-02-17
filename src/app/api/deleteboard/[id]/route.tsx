@@ -12,8 +12,11 @@ export async function DELETE(request: Request) {
     // const reqBody = await request.json();
     const url = new URL(request.url);
     const id = url.pathname.split('/').pop() as string;
-    // 환경 변수에서 외부 API URL을 가져오거나 기본값 사용
-    const externalApiUrl = process.env.EXTERNAL_API_URL || `http://192.168.2.141:8080/v1/bookstore/${id}`;
+    
+    // 환경 변수에서 외부 API 기본 URL을 가져오거나 기본값 사용
+    const baseUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+    // v1 뒤에 기존 값인 /bookstore/${id}를 추가합니다.
+    const externalApiUrl = `${baseUrl}/bookstore/${id}`;
 
     // 외부 API 호출
     const externalResponse = await fetch(externalApiUrl, {

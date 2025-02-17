@@ -1,30 +1,34 @@
-// app/api/account/route.tsx (Next.js App Directory 방식)
+// app/api/deletereport/[id]/route.tsx (Next.js App Directory 방식)
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-export async function GET(request: Request) {
+export async function DELETE(request: Request, context: { params: { id: string } }) {
   try {
     // console.log("route.tsx 진입");
     const cookieStore = await cookies();
     const memberCookie = cookieStore.get("memberCookie")?.value;
-    console.log("account route token:", memberCookie);
 
-    // const reqBody: CreateBookRequest = await request.json();
+    // 동적 라우트 파라미터를 비구조화하지 않고, await로 추출합니다.
+    const params = await Promise.resolve(context.params);
+    const reportId = params.id;
 
-    // 기본 URL을 환경 변수 또는 기본 값으로 설정한 후, '/members/' 경로를 추가합니다.
-    const baseUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
-    const externalApiUrl = `${baseUrl}/members/`;
+    // 추가 데이터가 필요한 경우 request body 파싱 (필요 없다면 제거 가능)
+    const reqBody = await request.json();
+    console.log("reqBody:", reqBody);
+
+    // 변경된 부분: EXTERNAL_API_URL를 기본 URL로 사용하고, '/reports/${reportId}' 경로를 추가함
+    const externalApiBase = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+    const externalApiUrl = `${externalApiBase}/reports/${reportId}`;
 
     // 외부 API 호출
     const externalResponse = await fetch(externalApiUrl, {
-      method: "GET",
+      method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         "memberId": memberCookie ?? "",
-        // "name": "google_110277259246938366893",
       },
       // 필요한 경우 request 데이터를 body에 포함시키세요.
-      // body: JSON.stringify(reqBody),
+      body: JSON.stringify(reqBody),
     });
     console.log("externalResponse:", externalResponse);
 
@@ -37,7 +41,12 @@ export async function GET(request: Request) {
       throw new Error("외부 API 호출에 실패했습니다.");
     }
 
-    // 외부 API 응답 데이터 읽기
+    // 응답 객체를 클론하여 로그에 사용
+    const clonedResponse = externalResponse.clone();
+    const responseText = await clonedResponse.text();
+    console.log("external API 응답 body:", responseText);
+
+    // 원본 응답 객체에서 JSON 데이터 읽기
     const externalData = await externalResponse.json();
     // console.log("route.tsx:", externalData);
 
@@ -48,7 +57,7 @@ export async function GET(request: Request) {
       result: externalData.result,
     });
   } catch (error) {
-    console.error("프로필 조회 중 에러:", error);
+    console.error("독후감 삭제 중 에러:", error);
     if (error instanceof Error) {
       console.error("에러 메시지:", error.message);
     }

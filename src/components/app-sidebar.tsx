@@ -70,7 +70,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   
   // 디버깅을 위한 콘솔 로그 추가
   React.useEffect(() => {
-    console.log("다크모드 상태:", isDarkMode)
+    // console.log("다크모드 상태:", isDarkMode)
   }, [isDarkMode])
 
   const data = {
@@ -85,6 +85,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       {
         title: "내 책방",
         url: "/mybookstore",
+        icon: BookOpen,
+      },
+      {
+        title: "독후감",
+        url: "/report",
         icon: BookOpen,
       },
       {

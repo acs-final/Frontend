@@ -113,22 +113,18 @@ function MainTestPage() {
     setIsLoading(true);
 
     try {
-      // sessionStorage에서 "sub" 및 "accessToken" 값을 추출합니다.
       const memberId = sessionStorage.getItem("sub");
       const accessToken = sessionStorage.getItem("accessToken");
       console.log("page memberId:", memberId);
       console.log("page accessToken:", accessToken);
 
-      // 카테고리가 "직업 동화"이면 선택된 직업 값을 붙여서 genre를 생성합니다.
-      const genre =
-        data.category === "직업 동화" && data.job
-          ? `${data.job} 직업 동화`
-          : data.category;
+      // job이 있으면 job 값과 category를 결합하여 새로운 category를 생성
+      const combinedCategory = data.job ? `${data.job} ${data.category}` : data.category;
 
       const requestBody = {
-        genre: genre,
+        category: combinedCategory,  // 결합된 카테고리 사용
         gender: data.gender,
-        challenge: data.theme,
+        theme: data.theme,
       };
 
       const response = await fetch("/api/createbook", {
@@ -136,13 +132,12 @@ function MainTestPage() {
         headers: {
           "Content-Type": "application/json",
           "memberId": memberId || "",
-          // "accessToken": accessToken || ""
         },
         body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
-        throw new Error("동화 생성 요청에 실패했습니다.");
+        throw new Error("유효한 동화 데이터가 없습니다.");
       }
 
       const result = await response.json();
@@ -151,10 +146,7 @@ function MainTestPage() {
       if (result && result.isSuccess && result.result && result.result.body) {
         const storyResult = result.result;
         const sortedKeys = Object.keys(storyResult.body).sort((a, b) => {
-          return (
-            parseInt(a.replace("page", ""), 10) -
-            parseInt(b.replace("page", ""), 10)
-          );
+          return parseInt(a.replace("page", ""), 10) - parseInt(b.replace("page", ""), 10);
         });
         const pages: StoryPage[] = sortedKeys.map((key, index) => ({
           page: key,
@@ -408,7 +400,7 @@ function MainTestPage() {
                       <FormControl>
                         <RadioGroup
                           onValueChange={handleCategoryChange}
-                          defaultValue={field.value}
+                          value={field.value}
                           className="space-y-2"
                         >
                           {[
@@ -433,7 +425,7 @@ function MainTestPage() {
                           {showJobSelect && (
                             <Select
                               onValueChange={(value) => form.setValue("job", value)}
-                              defaultValue={form.getValues("job")}
+                              value={form.getValues("job")}
                             >
                               <FormControl>
                                 <SelectTrigger className="mt-2 w-[200px] text-lg">
@@ -480,7 +472,7 @@ function MainTestPage() {
                       <FormControl>
                         <RadioGroup
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                           className="flex flex-col space-y-2"
                         >
                           {["남자", "여자"].map((gender) => (
@@ -515,7 +507,7 @@ function MainTestPage() {
                       <FormControl>
                         <RadioGroup
                           onValueChange={field.onChange}
-                          defaultValue={field.value}
+                          value={field.value}
                           className="grid grid-cols-2 gap-2"
                         >
                           {[

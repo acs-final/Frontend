@@ -11,8 +11,11 @@ export async function GET(request: Request) {
     // JSON 데이터를 파싱합니다.
     // const reqBody = await request.json();
 
-    // 환경 변수에서 외부 API URL을 가져오거나 기본값 사용
-    const externalApiUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1/members/fairytale";
+    // EXTERNAL_API_URL을 환경 변수로부터 받아 기본 URL로 설정합니다.
+    // EXTERNAL_API_URL이 http://192.168.2.141:8080/v1와 같이 주어지면,
+    // 그 뒤에 '/members/fairytale'를 붙여서 최종 URL을 구성합니다.
+    const baseApiUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+    const externalApiUrl = `${baseApiUrl}/members/fairytale`;
 
     // 외부 API 호출
     const externalResponse = await fetch(externalApiUrl, {

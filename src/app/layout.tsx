@@ -23,6 +23,8 @@ import {
 } from "@/components/ui/sidebar";
 import { ModeToggle } from "@/components/DarkModeToggle"; // 다크모드 토글 버튼 컴포넌트 추가
 
+import SetBackground from "./SetBackground"; // 추가된 컴포넌트 임포트
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -52,6 +54,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <SetBackground />
         <ClientProviders>
           <SidebarProvider>
             <AppSidebar />

@@ -26,11 +26,12 @@ export async function POST(request: Request) {
     const reqBody: CreateBookRequest = await request.json();
     const { genre, gender, challenge } = reqBody;
 
-    // 환경 변수에서 외부 API URL을 가져오거나 기본값 사용
-    const externalApiUrl =
-      process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1/fairytale/sonnetaaa";
+    // 환경 변수로부터 base URL을 가져오거나 기본값으로 할당 (EXTERNAL_API_URL가 "http://192.168.2.141:8080/v1" 일 경우)
+    const baseApiUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+    // baseApiUrl의 마지막 '/'가 있으면 제거 후 '/fairytale/sonnet' 경로 추가
+    const externalApiUrl = `${baseApiUrl.replace(/\/$/, "")}/fairytale/sonnet`;
 
-    // 외부 API 호출 (실제 URL 및 요청 데이터에 맞게 수정)
+    // 외부 API 호출
     const externalResponse = await fetch(externalApiUrl, {
       method: "POST",
       headers: {

@@ -4,6 +4,7 @@ import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 interface Book {
   fairytaleId: string;
@@ -13,6 +14,10 @@ interface Book {
 }
 
 export default function BookRecommendationPage() {
+  // URL의 쿼리 파라미터에서 genre 값 추출
+  const searchParams = useSearchParams();
+  const genre = searchParams.get("genre");
+
   const [books, setBooks] = React.useState<Book[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -21,7 +26,15 @@ export default function BookRecommendationPage() {
   React.useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await fetch("/api/recommended");
+        // genre 값이 있을 경우 요청 본문에 포함합니다.
+        const requestBody = genre ? { genre } : {};
+        const response = await fetch("/api/books", {
+          method: "POST", // POST 메서드로 body 전달
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(requestBody),
+        });
         const data = await response.json();
         console.log(data);
 
@@ -46,7 +59,7 @@ export default function BookRecommendationPage() {
     };
 
     fetchBooks();
-  }, []);
+  }, [genre]); // genre 값이 변경되면 다시 호출
 
   if (isLoading) return <div className="text-center py-8">로딩중...</div>;
   if (error) return <div className="text-center py-8 text-red-500">{error}</div>;

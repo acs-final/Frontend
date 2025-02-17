@@ -4,6 +4,8 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowBigRight, ArrowBigLeft, Play, Pause } from "lucide-react";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
 
 // API 응답 구조에 맞춘 인터페이스 정의
 interface Body {
@@ -28,6 +30,29 @@ interface BookData {
   mp3Url: Mp3Url[];
 }
 
+/**
+ * S3와 같이 CORS 이슈가 있는 이미지의 경우,
+ * fetch를 통해 이미지를 blob으로 다운로드 받고, FileReader를 사용하여 base64 문자열로 반환합니다.
+ */
+const getBase64FromUrl = async (url: string): Promise<string> => {
+  try {
+    const response = await fetch(url, { mode: "cors" });
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(blob);
+      reader.onloadend = () => {
+        resolve(reader.result as string);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  } catch (error) {
+    console.error("이미지 다운로드 실패:", error);
+    // 에러 발생 시 원본 URL을 반환하지만, 캡쳐에 문제가 생길 수 있음
+    return url;
+  }
+};
+
 export default function BookDetailPage() {
   const { id } = useParams();
   const [bookData, setBookData] = useState<BookData | null>(null);
@@ -40,6 +65,9 @@ export default function BookDetailPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
+
+  // PDF 내보내기에 사용할 영역 ref (원래 내용은 유지)
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -68,7 +96,7 @@ export default function BookDetailPage() {
   if (error) return <div>Error: {error}</div>;
   if (!bookData) return <div>동화 데이터를 찾을 수 없습니다.</div>;
 
-  // 동화 데이터를 기반으로 페이지 배열을 구성합니다.
+  // 동화 데이터를 기반으로 페이지 배열 구성
   const pages =
     bookData && bookData.body
       ? Object.keys(bookData.body)
@@ -82,11 +110,15 @@ export default function BookDetailPage() {
             title: bookData.title,
             image:
               bookData.imageUrl && bookData.imageUrl.length > 0
-                ? bookData.imageUrl[index % bookData.imageUrl.length].imageUrl
+                ? bookData.imageUrl[
+                    index % bookData.imageUrl.length
+                  ].imageUrl
                 : "/storybook/default.png",
             audio:
               bookData.mp3Url && bookData.mp3Url.length > 0
-                ? bookData.mp3Url[index % bookData.mp3Url.length].mp3Url
+                ? bookData.mp3Url[
+                    index % bookData.mp3Url.length
+                  ].mp3Url
                 : ""
           }))
       : [
@@ -170,8 +202,80 @@ export default function BookDetailPage() {
     }
   };
 
+  // PDF 내보내기 함수 (수정됨)
+  // 동화의 모든 페이지에 대해, S3 이미지를 다운로드 받아 base64로 변환하고,
+  // 이미지와 텍스트만 포함시키도록 임시 DOM에서 캡처합니다.
+  const exportToPDF = async () => {
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+
+    for (let i = 0; i < pages.length; i++) {
+      // 임시 컨테이너 생성 (화면에 보이지 않도록)
+      const tempContainer = document.createElement("div");
+      tempContainer.style.position = "absolute";
+      tempContainer.style.left = "-10000px";
+      tempContainer.style.top = "0";
+      tempContainer.style.width = "600px"; // 임의의 너비 (필요에 따라 조정)
+      tempContainer.style.padding = "20px";
+      tempContainer.style.fontFamily = "sans-serif";
+
+      // 이미지 추가 (S3 링크 이미지를 base64로 다운로드)
+      const img = document.createElement("img");
+      const base64Image = await getBase64FromUrl(pages[i].image);
+      img.src = base64Image;
+      img.style.width = "100%";
+      img.style.display = "block";
+      img.style.marginBottom = "10px";
+      tempContainer.appendChild(img);
+
+      // 제목 추가
+      const titleEl = document.createElement("h2");
+      titleEl.style.fontSize = "24px";
+      titleEl.style.margin = "0";
+      titleEl.innerText = pages[i].title;
+      tempContainer.appendChild(titleEl);
+
+      // 텍스트 추가
+      const textEl = document.createElement("p");
+      textEl.style.fontSize = "16px";
+      textEl.style.marginTop = "10px";
+      textEl.innerText = pages[i].text;
+      tempContainer.appendChild(textEl);
+
+      document.body.appendChild(tempContainer);
+
+      // 이미지 로드 완료 대기
+      await new Promise<void>((resolve) => {
+        if (img.complete) {
+          resolve();
+        } else {
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+        }
+      });
+
+      // 렌더링 안정화를 위해 잠시 대기 (100ms)
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      const canvas = await html2canvas(tempContainer);
+      const dataURL = canvas.toDataURL("image/png");
+      const imgProps = pdf.getImageProperties(dataURL);
+      const imgWidth = pdfWidth;
+      const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+      if (i > 0) {
+        pdf.addPage();
+      }
+      pdf.addImage(dataURL, "PNG", 0, 0, imgWidth, imgHeight);
+
+      document.body.removeChild(tempContainer);
+    }
+    pdf.save("full_story.pdf");
+  };
+
   return (
-    <section className="p-8 relative">
+    // 기존 콘텐츠 영역(화면 구성용)
+    <section className="p-8 relative" ref={contentRef}>
       <div className="storybook mx-20 min-h-[calc(100vh-200px)] flex flex-col">
         {/* 이전 페이지 버튼 */}
         <button
@@ -250,11 +354,18 @@ export default function BookDetailPage() {
         </button>
         {/* 하단 버튼 그룹 */}
         <div className="flex justify-center gap-4 py-4 border-t border-gray-200">
-          <Link href="/review">
+          <Link href={`/review/${bookData.fairytaleId}`}>
             <button className="h-9 px-4 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors flex items-center justify-center">
               평가하기
             </button>
           </Link>
+          {/* 수정된 PDF 내보내기 버튼 */}
+          <button
+            onClick={exportToPDF}
+            className="h-9 px-4 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg transition-colors flex items-center justify-center"
+          >
+            PDF 내보내기
+          </button>
         </div>
       </div>
     </section>

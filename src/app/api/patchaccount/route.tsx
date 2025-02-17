@@ -11,8 +11,10 @@ export async function PATCH(request: Request) {
     // JSON 데이터를 파싱합니다.
     const reqBody = await request.json();
 
-    // 환경 변수에서 외부 API URL을 가져오거나 기본값 사용
-    const externalApiUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1/members/";
+    // 환경 변수에서 외부 API URL을 가져오거나 기본값을 사용합니다.
+    // 기본값은 "http://192.168.2.141:8080/v1"이고, 후에 "/members/"를 붙입니다.
+    const baseUrl = process.env.EXTERNAL_API_URL ?? "http://192.168.2.141:8080/v1";
+    const externalApiUrl = `${baseUrl.replace(/\/$/, "")}/members/`;
 
     // 외부 API 호출
     const externalResponse = await fetch(externalApiUrl, {

@@ -12,7 +12,10 @@ export async function DELETE(request: Request) {
     // const reqBody = await request.json();
 
     // 환경 변수에서 외부 API URL을 가져오거나 기본값 사용
-    const externalApiUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1/members/";
+    // EXTERNAL_API_URL이 "http://192.168.2.141:8080/v1"으로 주어지더라도 그 뒤에 "/members/"를 추가합니다.
+    const baseUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+    const base = baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+    const externalApiUrl = `${base}/members/`;
 
     // 외부 API 호출
     const externalResponse = await fetch(externalApiUrl, {
@@ -23,7 +26,7 @@ export async function DELETE(request: Request) {
         // "name": "google_110277259246938366893",
       },
       // 필요한 경우 request 데이터를 body에 포함시키세요.
-    //   body: JSON.stringify(reqBody),
+      // body: JSON.stringify(reqBody),
     });
     console.log("externalResponse:", externalResponse);
 

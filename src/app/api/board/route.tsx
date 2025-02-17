@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 
+// 환경 변수로부터 외부 API Base URL을 불러오고, 없을 경우 기본 URL 사용
+const apiBaseUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+// board 리소스 경로를 추가 (EXTERNAL_API_URL에는 board 경로가 포함되어 있지 않으므로 추가)
+const boardApiUrl = `${apiBaseUrl.replace(/\/$/, "")}/board`;
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ): Promise<NextResponse> {
-  const externalUrl = `http://192.168.2.141:8080/v1/bookstore/`;
-
   try {
-    const response = await fetch(externalUrl);
+    // 동적 파라미터 id를 사용하여 특정 board 데이터를 가져옴.
+    const response = await fetch(`${boardApiUrl}/${params.id}`);
     if (!response.ok) {
       return NextResponse.json(
         { error: "외부 요청 실패" },
@@ -37,8 +41,8 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // 외부 API에 DELETE 요청 보내기 (boardId만으로 요청)
-    const externalResponse = await fetch(`http://192.168.2.141:8080/v1/bookstore/${boardId}`, {
+    // board 리소스 경로를 포함하여 외부 API에 DELETE 요청 보내기
+    const externalResponse = await fetch(`${boardApiUrl}/${boardId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",

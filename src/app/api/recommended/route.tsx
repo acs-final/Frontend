@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
+const externalApiUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+
 export async function GET() {
   try {
-    const response = await fetch('http://192.168.2.141:8080/v1/fairytale/top');
+    // 외부 API URL을 환경변수에서 받아와 사용하며, 없을 경우 기본 URL을 사용합니다.
+    const response = await fetch(`${externalApiUrl}/fairytale/top`);
     const data = await response.json();
     
     return NextResponse.json(data);

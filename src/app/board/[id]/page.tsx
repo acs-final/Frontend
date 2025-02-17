@@ -82,20 +82,38 @@ const HalfStar = () => (
 );
 
 // 별점 점수추가
-const StarRating = ({ rating, setRating }) => {
+const StarRating = ({
+  rating,
+  setRating,
+  readOnly = false,
+}: {
+  rating: number;
+  setRating: (rating: number) => void;
+  readOnly?: boolean;
+}) => {
   return (
-    <div className="flex space-x-1 cursor-pointer">
+    <div className={`flex space-x-1 ${readOnly ? "" : "cursor-pointer"}`}>
       {[1, 2, 3, 4, 5].map((star) => (
         <div
           key={star}
           className="relative"
-          onClick={(e) => {
-            const { left, width } = e.currentTarget.getBoundingClientRect();
-            const x = e.clientX - left;
-            setRating(x < width / 2 ? star - 0.5 : star); // 0.5 단위 반영
-          }}
+          onClick={
+            !readOnly
+              ? (e) => {
+                  const { left, width } = e.currentTarget.getBoundingClientRect();
+                  const x = e.clientX - left;
+                  setRating(x < width / 2 ? star - 0.5 : star); // 0.5 단위 반영
+                }
+              : undefined
+          }
         >
-          {rating >= star ? <FullStar /> : rating >= star - 0.5 ? <HalfStar /> : <EmptyStar />}
+          {rating >= star ? (
+            <FullStar />
+          ) : rating >= star - 0.5 ? (
+            <HalfStar />
+          ) : (
+            <EmptyStar />
+          )}
         </div>
       ))}
     </div>
@@ -111,8 +129,8 @@ export default function ReviewPage() {
   const [rating, setRating] = useState(0); // ⭐ 실제 선택된 평점
   const [hoverRating, setHoverRating] = useState(0); // ⭐ 마우스 오버 상태
   const [imageUrl, setImageUrl] = useState(""); // API로부터 가져올 이미지 URL
-  const [comment, setComment] = useState(""); // 댓글 입력 상태
-  const [comments,setComments] = useState("");
+  const [comment, setComment] = useState("");
+  const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true); // ✅ 로딩 상태 추가
 
   // 현재 보여줄 평점: hover 상태가 있으면 hoverRating, 아니면 rating
@@ -155,7 +173,7 @@ export default function ReviewPage() {
           );
           // setComments(data.result.comment.reverse());
           setComments(
-            data.result.comment.reverse().map((c) => ({
+            data.result.comment.reverse().map((c: any) => ({
               ...c,
               newContent: c.content, // ✅ 기존 content를 복사하여 수정 가능하도록 추가
               newScore: c.score, // ✅ 기존 score를 복사하여 수정 가능하도록 추가
@@ -174,7 +192,7 @@ export default function ReviewPage() {
     fetchBoard();
   }, [id]); // ✅ `id` 값이 변경될 때만 실행
   // 댓글 삭제 함수
-  const handleCommentDelete = async (commentId) => {
+  const handleCommentDelete = async (commentId: string) => {
     if (!id) {
       console.warn("⚠️ 게시글 ID가 없습니다.");
       return;
@@ -201,7 +219,7 @@ export default function ReviewPage() {
       const data = await res.json();
       if (data.isSuccess) {
         console.log("✅ 댓글이 성공적으로 삭제되었습니다.");
-        setComments(comments.filter((c) => c.commentId !== commentId));
+        setComments(comments.filter((c: any) => c.commentId !== commentId));
       } else {
         console.warn("⚠️ 댓글 삭제 실패:", data.message);
       }
@@ -218,7 +236,7 @@ export default function ReviewPage() {
   };
   // 별 아이콘 내부에서 마우스 클릭 위치에 따라 반/전체 선택
   // handleCommentUpdate 함수 
-  const handleCommentUpdate = async (commentId, newContent, newScore) => {
+  const handleCommentUpdate = async (commentId: string, newContent: string, newScore: number) => {
     if (!id) {
       console.warn("⚠️ 게시글 ID가 없습니다.");
       return;
@@ -250,7 +268,7 @@ export default function ReviewPage() {
       if (data.isSuccess) {
         console.log("✅ 댓글이 성공적으로 수정되었습니다:", data.result);
         setComments(
-          comments.map((c) =>
+          comments.map((c: any) =>
             c.commentId === commentId
               ? { ...c, content: newContent, score: newScore, editing: false }
               : c
@@ -312,7 +330,7 @@ export default function ReviewPage() {
           createdAt: new Date().toISOString(), // 현재 시간 추가
         };
   
-        setComments((prevComments) => [newComment, ...prevComments]); // 최신 댓글이 위에 추가됨
+        setComments((prevComments: any) => [newComment, ...prevComments]); // 최신 댓글이 위에 추가됨
         setComment(""); // 입력 필드 초기화
         setRating(0); // 별점 초기화
       } else {
@@ -406,7 +424,7 @@ return (
                     value={c.newContent}
                     onChange={(e) =>
                       setComments(
-                        comments.map((comment) =>
+                        comments.map((comment: any) =>
                           comment.commentId === c.commentId
                             ? { ...comment, newContent: e.target.value }
                             : comment
@@ -435,7 +453,7 @@ return (
                       rating={c.newScore ?? c.score}
                       setRating={(newScore) =>
                         setComments(
-                          comments.map((comment) =>
+                          comments.map((comment: any) =>
                             comment.commentId === c.commentId
                               ? { ...comment, newScore }
                               : comment
@@ -460,7 +478,7 @@ return (
                         variant="outline"
                         onClick={() =>
                           setComments(
-                            comments.map((comment) =>
+                            comments.map((comment: any) =>
                               comment.commentId === c.commentId
                                 ? { ...comment, editing: false, newContent: c.content }
                                 : comment
@@ -477,7 +495,7 @@ return (
                         variant="outline"
                         onClick={() =>
                           setComments(
-                            comments.map((comment) =>
+                            comments.map((comment: any) =>
                               comment.commentId === c.commentId
                                 ? { ...comment, editing: true, newContent: c.content }
                                 : comment
@@ -506,3 +524,4 @@ return (
     </div>
   </div>
 );
+}

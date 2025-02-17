@@ -4,8 +4,13 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
 
+    // EXTERNAL_API_URL을 http://192.168.2.141:8080/v1 로 설정해도
+    // /members/ 경로가 유지되도록 기본 URL에 /members/를 추가합니다.
+    const baseUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+    const externalApiUrl = `${baseUrl}/members/`;
+
     // accessToken을 포워딩할 URL로 전달합니다.
-    const response = await fetch("http://192.168.2.141:8080/members/logout", {
+    const response = await fetch(`${externalApiUrl}logout`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),

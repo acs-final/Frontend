@@ -1,7 +1,7 @@
 "use client"; // ✅ 클라이언트 컴포넌트 설정
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea"
@@ -85,6 +85,7 @@ const HalfStar = () => (
 
 export default function ReviewPage() {
   const { id } = useParams();
+  const router = useRouter();
   const [title, setTitle] = useState(""); // API로부터 가져올 제목
   const [body, setBody] = useState(""); // API로부터 가져올 내용
   const [rating, setRating] = useState(0); // ⭐ 실제 선택된 평점
@@ -247,11 +248,13 @@ export default function ReviewPage() {
     });
 
     if (response.ok) {
+      console.log(response);
       console.log("게시글 생성 성공");
       toast({
         title: "게시글 생성 성공"
       });
-      // 필요에 따라 추가 동작 (예: 페이지 이동, 알림 표시 등) 수행
+      // 성공 후 /board로 이동
+      router.push("/board");
     } else {
       console.error("게시글 생성 실패");
     }
