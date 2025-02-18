@@ -26,6 +26,12 @@ export default function CognitoResponsePage() {
       }
 
       try {
+        // redirectUri 설정 (환경 변수를 사용하고, 없다면 기본값으로 localhost 사용)
+        const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI 
+          ? `${process.env.NEXT_PUBLIC_REDIRECT_URI}`
+          : "http://localhost:3000/cognitoresponse";
+	console.log("redirectUri:", redirectUri);
+
         // API 라우트로 토큰 교환 요청 (axios 대신 fetch 사용)
         const response = await fetch("/api/cognitoresponse", {
           method: "POST",
@@ -34,7 +40,7 @@ export default function CognitoResponsePage() {
           },
           body: JSON.stringify({
             code: codeFromUrl,
-            redirectUri: "http://localhost:3000/cognitoresponse",
+            redirectUri: redirectUri,
           }),
         });
 

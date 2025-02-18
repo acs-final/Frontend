@@ -20,37 +20,33 @@ export async function POST(request: Request) {
       client_id: clientId,
     });
 
-    // 헤더 구성 (클라이언트 시크릿을 사용하지 않는 경우)
+    // 클라이언트 시크릿을 사용하지 않는 경우의 헤더
+    const tokenUrl =
+      "https://ap-northeast-2lod1czvcj.auth.ap-northeast-2.amazoncognito.com/oauth2/token";
+
     const headers: HeadersInit = {
       "Content-Type": "application/x-www-form-urlencoded",
     };
 
-    console.log("요청 파라미터:", params.toString());
+    console.log("Cognito 요청 파라미터:", params.toString());
 
-    // EXTERNAL_API_URL 환경변수 사용, 없으면 기본 URL 사용
-    const externalApiUrl =
-      process.env.EXTERNAL_API_URL ||
-      "http://192.168.2.141:8080/v1";
-
-    if (!process.env.EXTERNAL_API_URL) {
-      console.warn("EXTERNAL_API_URL이 설정되지 않아 기본 URL을 사용합니다:", externalApiUrl);
-    }
-
-    const response = await fetch(externalApiUrl, {
+    const response = await fetch(tokenUrl, {
       method: "POST",
       headers,
       body: params.toString(),
     });
 
     const data = await response.json();
-    console.log("응답 코드:", response.status, data);
+    console.log("Cognito 응답 코드:", response.status, data);
 
     if (!response.ok) {
+      // console.error("Cognito 요청 실패:", data);
       return NextResponse.json({ error: data }, { status: response.status });
     }
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
+    // console.error("서버 오류 발생:", error.message);
     return NextResponse.json({ error: error.message || "서버 오류" }, { status: 500 });
   }
 }

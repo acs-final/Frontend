@@ -1,41 +1,31 @@
 // app/api/createbook/route.js (Next.js App Directory 방식)
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+// import { cookies } from "next/headers";
 
-// 요청 데이터를 위한 타입 정의 (업데이트된 요청 구조)
-type CreateBoardRequest = {
-  title: string;
-  body: string;
-  score: number;
-  fairytaleId: number;
-  imageUrl: string;
-};
-
-export async function POST(request: Request) {
+export async function GET(request: Request) {
   try {
     // console.log("route.tsx 진입");
-    const cookieStore = await cookies();
-    const memberCookie = cookieStore.get("memberCookie")?.value;
+    // const cookieStore = await cookies();
+    // const memberCookie = cookieStore.get("memberCookie")?.value;
+    // console.log("login route token:", memberCookie);
 
-    // 요청 본문을 업데이트된 타입으로 파싱
-    const reqBody: CreateBoardRequest = await request.json();
-    console.log("reqBody::::::::::::::::::::::::::::::::", reqBody);
+    // const reqBody: CreateBookRequest = await request.json();
 
-    // 기본 EXTERNAL_API_URL을 "http://192.168.2.141:8080/v1"로 설정하고,
-    // v1 뒤에 필요한 값("/bookstore/")은 그대로 붙입니다.
-    const baseApiUrl = (process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1").replace(/\/+$/, "");
-    const externalApiUrl = `${baseApiUrl}/bookstore/`;
+    // 환경 변수에서 외부 API의 Base URL을 가져오거나 기본값 사용
+    const baseUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+    const externalApiUrl = `${baseUrl}/bookstore/`;
 
     // 외부 API 호출
     const externalResponse = await fetch(externalApiUrl, {
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "memberId": memberCookie ?? "",
+        // "memberId": memberCookie ?? "",
       },
-      body: JSON.stringify(reqBody),
+      // 필요한 경우 request 데이터를 body에 포함시키세요.
+      // body: JSON.stringify(reqBody),
     });
-    // console.log("externalResponse::::::::::::::::::::::::::::::::", externalResponse);
+    console.log("externalResponse:", externalResponse);
 
     if (!externalResponse.ok) {
       console.log(
@@ -57,7 +47,7 @@ export async function POST(request: Request) {
       result: externalData.result,
     });
   } catch (error) {
-    console.error("API 호출 중 에러:", error);
+    console.error("로그인 중 에러:", error);
     if (error instanceof Error) {
       console.error("에러 메시지:", error.message);
     }

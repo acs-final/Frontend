@@ -1,6 +1,6 @@
 "use client"; // 클라이언트 컴포넌트 설정
 
-import React from "react";
+import React, { Suspense } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -13,7 +13,7 @@ interface Book {
   // 추가 필드가 있다면 여기에 정의
 }
 
-export default function BookRecommendationPage() {
+function BookRecommendationContent() {
   // URL의 쿼리 파라미터에서 genre 값 추출
   const searchParams = useSearchParams();
   const genre = searchParams.get("genre");
@@ -108,5 +108,13 @@ export default function BookRecommendationPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function BookRecommendationPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-8">로딩중...</div>}>
+      <BookRecommendationContent />
+    </Suspense>
   );
 }

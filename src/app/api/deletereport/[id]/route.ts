@@ -2,15 +2,14 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-export async function DELETE(request: Request, context: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // console.log("route.tsx 진입");
+    // params는 Promise이므로 await를 통해 구조 분해합니다.
+    const { id: reportId } = await params;
+
     const cookieStore = await cookies();
     const memberCookie = cookieStore.get("memberCookie")?.value;
-
-    // 동적 라우트 파라미터를 비구조화하지 않고, await로 추출합니다.
-    const params = await Promise.resolve(context.params);
-    const reportId = params.id;
 
     // 추가 데이터가 필요한 경우 request body 파싱 (필요 없다면 제거 가능)
     const reqBody = await request.json();

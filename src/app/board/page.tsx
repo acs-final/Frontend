@@ -36,7 +36,7 @@ export default function FreeBoardPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch("/api/board");
+        const response = await fetch("/api/getboard");
         const data = await response.json();
         if (data.isSuccess) {
           // API의 result 배열 데이터를 게시글 형태로 매핑

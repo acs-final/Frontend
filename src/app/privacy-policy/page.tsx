@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
       {/* 소개 */}
       <section>
         <p className="text-base leading-relaxed">
-          [MOAI] (이하 "회사")는 이용자의 개인정보 보호를 매우 중요하게 생각하며, "정보통신망 이용촉진 및 정보보호 등에 관한 법률", "개인정보 보호법" 등 관련 법령을 준수하고 있습니다. 본 개인정보처리방침은 회사가 제공하는 서비스(이하 "서비스")를 이용함에 있어 수집되는 개인정보의 처리 및 보호에 관한 사항을 규정합니다.
+          [MOAI] (이하 &quot;회사&quot;)는 이용자의 개인정보 보호를 매우 중요하게 생각하며, &quot;정보통신망 이용촉진 및 정보보호 등에 관한 법률&quot;, &quot;개인정보 보호법&quot; 등 관련 법령을 준수하고 있습니다. 본 개인정보처리방침은 회사가 제공하는 서비스(이하 &quot;서비스&quot;)를 이용함에 있어 수집되는 개인정보의 처리 및 보호에 관한 사항을 규정합니다.
         </p>
       </section>
 
@@ -134,7 +134,7 @@ export default function PrivacyPolicy() {
         <h3 className="text-xl font-semibold mb-1">처리 정지 및 동의 철회</h3>
         <p className="mb-2">개인정보의 처리 정지 요청 및 동의 철회</p>
         <p>
-          <strong>절차 및 방법:</strong> 개인정보 관련 문의는 아래 '개인정보 보호책임자'에게 연락 주시면 지체 없이 조치하겠습니다.
+          <strong>절차 및 방법:</strong> 개인정보 관련 문의는 아래 &quot;개인정보 보호책임자&quot;에게 연락 주시면 지체 없이 조치하겠습니다.
         </p>
       </section>
 

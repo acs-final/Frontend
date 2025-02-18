@@ -4,12 +4,12 @@ import { cookies } from "next/headers"; // ✅ 쿠키 가져오기
 
 export async function POST(
   request: NextRequest,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     console.log("📌 [게시판 API] 댓글 추가 요청 수신");
 
-    const { id } = context.params;
+    const { id } = await context.params;
     if (!id) {
       throw new Error("❌ 게시글 ID가 없습니다.");
     }

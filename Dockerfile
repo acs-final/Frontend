@@ -1,31 +1,32 @@
-# 1단계: 빌드 단계
-FROM node:18-alpine AS builder
+# 1단계: 빌드 단계 
+FROM node:23-alpine AS builder
 WORKDIR /app
 
-# 의존성 설치를 위한 파일 복사 (package.json과 lock 파일)
-COPY package*.json ./
+ARG NEXT_PUBLIC_REDIRECT_URI
+ENV NEXT_PUBLIC_REDIRECT_URI=$NEXT_PUBLIC_REDIRECT_URI
 
-# 의존성 설치 (yarn을 사용하는 경우: RUN yarn install)
+# package.json 복사 및 의존성 설치
+COPY package*.json ./
 RUN npm install
 
-# 소스 코드 전체 복사
+# 소스 전체 복사 및 빌드 실행
 COPY . .
-
-# Next.js 빌드 (next.config.js가 있다면 설정도 반영됨)
 RUN npm run build
 
-# 2단계: 실행 단계
-FROM node:18-alpine AS runner
+# 2단계: 실행 단계 (standalone 모드 사용)
+FROM node:23-alpine AS runner
 WORKDIR /app
 
-# 환경 변수를 production으로 설정
-ENV NODE_ENV production
+ENV NODE_ENV=production
 
-# 빌드된 결과물을 복사
-COPY --from=builder /app ./
+# standalone 모드로 빌드된 파일만 복사
+COPY --from=builder /app/.next/standalone/ ./
+COPY --from=builder /app/.next/static/ ./.next/static/
 
-# 컨테이너가 사용할 포트 번호 지정 (Next.js 기본 포트는 3000)
+# 필요한 경우 public 폴더와 package.json도 복사 (standalone 모드에서는 package.json을 참조할 수 있음)
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./
+
 EXPOSE 3000
+CMD ["node", "server.js"]
 
-# 컨테이너 실행 시 시작 명령어
-CMD ["npm", "start"]

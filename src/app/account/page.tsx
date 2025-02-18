@@ -55,10 +55,17 @@ export default function MyPage() {
         }
         const json: ApiResponse = await res.json();
         if (json.isSuccess) {
-          setAccount(json.result);
-          setUsername(json.result.username); // 수정 가능하도록 상태에 저장
-          setNickname(json.result.nickname);
-          setChildAge(String(json.result.childAge));
+          // null 체크를 통해 기본값 할당
+          setAccount({
+            ...json.result,
+            username: json.result.username ?? "",
+            nickname: json.result.nickname ?? "",
+            credit: json.result.credit ?? 0, // credit의 경우 0 또는 원하는 기본값
+            childAge: json.result.childAge != null ? json.result.childAge : 0,
+          });
+          setUsername(json.result.username ?? "");
+          setNickname(json.result.nickname ?? "");
+          setChildAge(json.result.childAge != null ? String(json.result.childAge) : "");
         } else {
           console.error("API 응답 에러: ", json.message);
         }
@@ -198,7 +205,7 @@ export default function MyPage() {
                 <label className="block text-lg font-semibold mb-2">크레딧</label>
                 <input
                   type="text"
-                  value={account.credit}
+                  value={account.credit ?? ""}
                   readOnly
                   className="w-full border border-gray-300 p-2 rounded-md"
                 />
