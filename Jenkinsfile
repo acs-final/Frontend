@@ -28,7 +28,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Start to Build the Image"
-                sh "docker build --build-arg NEXT_PUBLIC_REDIRECT_URI=${NEXT_PUBLIC_REDIRECT_UR} -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
+  	  	echo "NEXT_PUBLIC_REDIRECT_URI=${NEXT_PUBLIC_REDIRECT_URI}"  // 변수 값 출력 (디버깅용)
+                sh "docker build --build-arg NEXT_PUBLIC_REDIRECT_URI=${NEXT_PUBLIC_REDIRECT_URI} -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
                 echo "Build Success"
             }
         }
