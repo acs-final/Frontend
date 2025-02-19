@@ -4,6 +4,7 @@ pipeline {
         BUILD_NUMBER = "v1"  // 빌드 번호
         IMAGE_NAME = "192.168.2.141:443/prototype/moai-front"  // Harbor 이미지 경로
         HARBOR_CREDENTIALS = credentials('harbor') // Jenkins에 등록한 Harbor Credentials ID
+        NEXT_PUBLIC_REDIRECT_URI=https://d768-118-218-200-33.ngrok-free.app/cognitoresponse 
     }
 
     stages {
@@ -27,7 +28,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 echo "Start to Build the Image"
-                sh "docker build -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
+                sh "docker build --build-arg ${NEXT_PUBLIC_REDIRECT_URI} -t ${IMAGE_NAME}:${BUILD_NUMBER} ."
                 echo "Build Success"
             }
         }
