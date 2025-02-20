@@ -28,7 +28,7 @@ import { LoaderIcon } from "lucide-react";
 
 // 타입 정의
 interface FormValues {
-  category: string;
+  genre: string;
   job: string;
   gender: string;
   theme: string;
@@ -42,6 +42,7 @@ interface StoryPage {
 }
 
 interface StoryBook {
+  fairytaleId: number;
   title: string;
   pages: StoryPage[];
   keywords: string[];
@@ -61,15 +62,15 @@ function MainTestPage() {
 
   const form = useForm<FormValues>({
     defaultValues: {
-      category: "",
+      genre: "",
       job: "",
       gender: "",
       theme: "",
     },
   });
 
-  const handleCategoryChange = (value: string) => {
-    form.setValue("category", value);
+  const handleGenreChange = (value: string) => {
+    form.setValue("genre", value);
     setShowJobSelect(value === "직업 동화");
     if (value !== "직업 동화") {
       form.setValue("job", "");
@@ -77,7 +78,7 @@ function MainTestPage() {
   };
 
   const formSchema = z.object({
-    category: z.enum(
+    genre: z.enum(
       [
         "한국 전래 동화",
         "세계 전래 동화",
@@ -86,7 +87,7 @@ function MainTestPage() {
         "가족 동화",
         "직업 동화",
       ],
-      { required_error: "카테고리를 선택해주세요." }
+      { required_error: "장르를 선택해주세요." }
     ),
     gender: z.enum(["남자", "여자"], { required_error: "성별을 선택해주세요." }),
     theme: z.enum(
@@ -118,11 +119,11 @@ function MainTestPage() {
       console.log("page memberId:", memberId);
       console.log("page accessToken:", accessToken);
 
-      // job이 있으면 job 값과 category를 결합하여 새로운 category를 생성
-      const combinedCategory = data.job ? `${data.job} ${data.category}` : data.category;
+      // job이 있으면 job 값과 genre를 결합하여 새로운 genre를 생성
+      const combinedGenre = data.job ? `${data.job} ${data.genre}` : data.genre;
 
       const requestBody = {
-        category: combinedCategory,  // 결합된 카테고리 사용
+        genre: combinedGenre,  // 결합된 장르 사용
         gender: data.gender,
         theme: data.theme,
       };
@@ -155,6 +156,7 @@ function MainTestPage() {
           audio: storyResult.mp3Url[index]?.mp3Url,
         }));
         setStoryBook({
+          fairytaleId: storyResult.fairytaleId,
           title: storyResult.title,
           pages,
           keywords: storyResult.keywords,
@@ -253,8 +255,8 @@ function MainTestPage() {
           </div>
           <div className="bg-gray-200 p-6 rounded-lg mb-6">
             <p className="text-lg">
-              카테고리: {submittedData?.category || "N/A"}
-              {submittedData?.category === "직업 동화" && submittedData?.job
+              장르: {submittedData?.genre || "N/A"}
+              {submittedData?.genre === "직업 동화" && submittedData?.job
                 ? ` / 직업: ${submittedData.job}`
                 : ""}
             </p>
@@ -370,7 +372,7 @@ function MainTestPage() {
             다시 만들기
           </button>
           <button
-            onClick={() => (window.location.href = "/review")}
+            onClick={() => (window.location.href = `/review/${storyBook.fairytaleId}`)}
             className="h-9 px-4 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors flex items-center justify-center"
           >
             평가하기
@@ -388,18 +390,18 @@ function MainTestPage() {
           <div className="w-full md:w-1/2">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                {/* 카테고리 선택 */}
+                {/* 장르 선택 */}
                 <FormField
                   control={form.control}
-                  name="category"
+                  name="genre"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-lg font-semibold">
-                        카테고리
+                        장르
                       </FormLabel>
                       <FormControl>
                         <RadioGroup
-                          onValueChange={handleCategoryChange}
+                          onValueChange={handleGenreChange}
                           value={field.value}
                           className="space-y-2"
                         >
@@ -410,15 +412,15 @@ function MainTestPage() {
                             "동물 동화",
                             "가족 동화",
                             "직업 동화",
-                          ].map((category) => (
-                            <div key={category} className="flex items-center space-x-2">
+                          ].map((genre) => (
+                            <div key={genre} className="flex items-center space-x-2">
                               <RadioGroupItem
-                                value={category}
-                                id={`category-${category}`}
+                                value={genre}
+                                id={`genre-${genre}`}
                                 className="w-5 h-5"
                               />
-                              <Label htmlFor={`category-${category}`} className="text-lg">
-                                {category}
+                              <Label htmlFor={`genre-${genre}`} className="text-lg">
+                                {genre}
                               </Label>
                             </div>
                           ))}
@@ -455,7 +457,7 @@ function MainTestPage() {
                         </RadioGroup>
                       </FormControl>
                       <FormMessage>
-                        {form.formState.errors.category?.message}
+                        {form.formState.errors.genre?.message}
                       </FormMessage>
                     </FormItem>
                   )}

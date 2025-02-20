@@ -1,10 +1,9 @@
 "use client"; // 클라이언트 컴포넌트 설정
 
-import React, { Suspense } from "react";
+import React from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 
 interface Book {
   fairytaleId: string;
@@ -13,11 +12,7 @@ interface Book {
   // 추가 필드가 있다면 여기에 정의
 }
 
-function BookRecommendationContent() {
-  // URL의 쿼리 파라미터에서 genre 값 추출
-  const searchParams = useSearchParams();
-  const genre = searchParams.get("genre");
-
+export default function BookRecommendationPage() {
   const [books, setBooks] = React.useState<Book[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -26,15 +21,7 @@ function BookRecommendationContent() {
   React.useEffect(() => {
     const fetchBooks = async () => {
       try {
-        // genre 값이 있을 경우 요청 본문에 포함합니다.
-        const requestBody = genre ? { genre } : {};
-        const response = await fetch("/api/books", {
-          method: "POST", // POST 메서드로 body 전달
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(requestBody),
-        });
+        const response = await fetch("/api/top");
         const data = await response.json();
         console.log(data);
 
@@ -59,7 +46,7 @@ function BookRecommendationContent() {
     };
 
     fetchBooks();
-  }, [genre]); // genre 값이 변경되면 다시 호출
+  }, []);
 
   if (isLoading) return <div className="text-center py-8">로딩중...</div>;
   if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
@@ -70,7 +57,7 @@ function BookRecommendationContent() {
         {/* 안내글 */}
         <div className="mb-8 text-center md:text-left">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            yes24에서 추천받고 싶으세요?
+            MOAI가 생성한 동화책과 비슷한 동화책을 추천해드려요!
           </h1>
         </div>
 
@@ -108,13 +95,5 @@ function BookRecommendationContent() {
         </div>
       </div>
     </section>
-  );
-}
-
-export default function BookRecommendationPage() {
-  return (
-    <Suspense fallback={<div className="text-center py-8">로딩중...</div>}>
-      <BookRecommendationContent />
-    </Suspense>
   );
 }

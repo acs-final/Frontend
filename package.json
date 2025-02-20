@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aws-amplify/auth": "^6.10.2",
+    "@headlessui/react": "^2.2.0",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-avatar": "^1.1.3",

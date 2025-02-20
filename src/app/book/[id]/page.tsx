@@ -360,12 +360,12 @@ export default function BookDetailPage() {
             </button>
           </Link>
           {/* 수정된 PDF 내보내기 버튼 */}
-          <button
+          {/* <button
             onClick={exportToPDF}
             className="h-9 px-4 bg-green-500 hover:bg-green-600 text-white text-sm rounded-lg transition-colors flex items-center justify-center"
           >
             PDF 내보내기
-          </button>
+          </button> */}
         </div>
       </div>
     </section>

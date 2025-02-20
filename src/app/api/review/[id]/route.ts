@@ -4,12 +4,12 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    // console.log("body:", body);
+    console.log("body:", body);
     const cookieStore = await cookies();
     const memberCookie = cookieStore.get("memberCookie")?.value;
     const externalApiUrl = process.env.EXTERNAL_API_URL
-      ? `${process.env.EXTERNAL_API_URL.replace(/\/+$/, "")}/v1/reports/`
-      : "http://192.168.2.141:8080/v1/reports/";
+      ? `${process.env.EXTERNAL_API_URL.replace(/\/+$/, "")}/reports/`
+      : "http://192.168.2.141:8080/reports/";
 
     const response = await fetch(externalApiUrl, {
       method: "POST",

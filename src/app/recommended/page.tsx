@@ -1,9 +1,10 @@
 "use client"; // 클라이언트 컴포넌트 설정
 
-import React from "react";
+import React, { Suspense } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 interface Book {
   fairytaleId: string;
@@ -12,7 +13,11 @@ interface Book {
   // 추가 필드가 있다면 여기에 정의
 }
 
-export default function BookRecommendationPage() {
+function BookRecommendationContent() {
+  // URL의 쿼리 파라미터에서 genre 값 추출
+  const searchParams = useSearchParams();
+  const genre = searchParams.get("genre");
+
   const [books, setBooks] = React.useState<Book[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -21,7 +26,14 @@ export default function BookRecommendationPage() {
   React.useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const response = await fetch("/api/recommended");
+        let url = "/api/recommended";
+        if (genre) {
+          url += `?genre=${encodeURIComponent(genre)}`;
+        }
+
+        const response = await fetch(url, {
+          method: "GET",
+        });
         const data = await response.json();
         console.log(data);
 
@@ -46,7 +58,7 @@ export default function BookRecommendationPage() {
     };
 
     fetchBooks();
-  }, []);
+  }, [genre]);
 
   if (isLoading) return <div className="text-center py-8">로딩중...</div>;
   if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
@@ -57,7 +69,7 @@ export default function BookRecommendationPage() {
         {/* 안내글 */}
         <div className="mb-8 text-center md:text-left">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            MOAI가 생성한 동화책과 비슷한 동화책을 추천해드려요!
+            yes24에서 추천받고 싶으세요?
           </h1>
         </div>
 
@@ -95,5 +107,13 @@ export default function BookRecommendationPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function BookRecommendationPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-8">로딩중...</div>}>
+      <BookRecommendationContent />
+    </Suspense>
   );
 }

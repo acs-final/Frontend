@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,21 @@ export default function CreditContent() {
   const searchParams = useSearchParams();
   const fairytaleId = searchParams.get('fairytaleId'); // URL 쿼리에서 fairytaleId 추출
 
+  // 초기에는 placeholder 이미지로 설정하고, API 응답에서 업데이트합니다.
+  const [coverImageSrc, setCoverImageSrc] = useState("/placeholder.jpg");
+  const [bookGenre, setBookGenre] = useState(""); // API에서 받아온 장르 값
+  const coverAlt = "책 표지 이미지"; // 대체 텍스트
+
+  // 장르에 따른 매핑
+  const genreMapping: { [key: string]: string } = {
+    "한국 전래 동화": "traditional",
+    "세계 전래 동화": "masterpiece",
+    "판타지 동화": "religious",
+    "동물 동화": "creative",
+    "가족 동화": "Life",
+    "직업 동화": "Learning"
+  };
+
   useEffect(() => {
     if (fairytaleId) {
       async function fetchBook() {
@@ -21,6 +36,19 @@ export default function CreditContent() {
           }
           const data = await response.json();
           console.log("API 응답:", data);
+          if (data.isSuccess && data.result) {
+            // 커버 이미지 업데이트
+            if (
+              Array.isArray(data.result.imageUrl) &&
+              data.result.imageUrl.length > 0
+            ) {
+              setCoverImageSrc(data.result.imageUrl[0].imageUrl);
+            }
+            // 장르 업데이트
+            if (data.result.genre) {
+              setBookGenre(data.result.genre);
+            }
+          }
         } catch (error) {
           console.error("API 요청 에러:", error);
         }
@@ -28,9 +56,6 @@ export default function CreditContent() {
       fetchBook();
     }
   }, [fairytaleId]);
-
-  const coverImageSrc = "/placeholder.jpg"; // 커버 이미지 경로
-  const coverAlt = "책 표지 이미지"; // 대체 텍스트
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -67,7 +92,11 @@ export default function CreditContent() {
                   <Button variant="outline" onClick={() => router.push('/recommended')}>
                     닫기
                   </Button>
-                  <Button onClick={() => router.push('/books?genre=value')}>
+                  <Button 
+                    onClick={() =>
+                      router.push(`/recommended?genre=${genreMapping[bookGenre] || "value"}`)
+                    }
+                  >
                     추천받기
                   </Button>
                 </div>

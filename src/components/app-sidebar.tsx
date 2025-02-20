@@ -100,7 +100,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         title: "도서추천",
-        url: "/recommended",
+        url: "/top",
         icon: Settings2,
       },
     ],
