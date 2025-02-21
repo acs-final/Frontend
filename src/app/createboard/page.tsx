@@ -108,7 +108,7 @@ export default function ReviewPage() {
         try {
           const res = await fetch(`/api/board/${id}`);
           if (!res.ok) {
-            console.error("HTTP 오류:", res.status);
+            console.log("HTTP 오류:", res.status);
             return;
           }
           const data = await res.json();
@@ -132,10 +132,10 @@ export default function ReviewPage() {
                 : data.result.imageUrl
             );
           } else {
-            console.error("게시글 불러오기 실패:", data.message || data);
+            console.log("게시글 불러오기 실패:", data.message || data);
           }
         } catch (error) {
-          console.error("게시글 불러오기 에러:", error);
+          console.log("게시글 불러오기 에러:", error);
         }
       }
       fetchBoard();
@@ -148,7 +148,7 @@ export default function ReviewPage() {
       try {
         const res = await fetch("/api/mybookstore");
         if (!res.ok) {
-          console.error("HTTP 오류:", res.status);
+          console.log("HTTP 오류:", res.status);
           return;
         }
         const data = await res.json();
@@ -161,10 +161,10 @@ export default function ReviewPage() {
             setImageUrl(data.result[0].imageUrl);
           }
         } else {
-          console.error("책 정보 불러오기 실패:", data.message || data);
+          console.log("책 정보 불러오기 실패:", data.message || data);
         }
       } catch (error) {
-        console.error("책 정보 불러오기 에러:", error);
+        console.log("책 정보 불러오기 에러:", error);
       }
     }
     fetchMyBookstore();
@@ -230,33 +230,55 @@ export default function ReviewPage() {
     const memberId = sessionStorage.getItem("sub");
     console.log("memberId:", memberId);
 
-    // 게시글 관련 데이터를 body에 담아 /api/createboard 엔드포인트로 POST 요청 실행
-    const response = await fetch("/api/createboard", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        // memberId 값을 헤더로 전달
-        "memberId": memberId || "",
-      },
-      body: JSON.stringify({
-        title,
-        body,
-        score: rating,
-        fairytaleId: selectedBook ? selectedBook.fairytaleId : 0,
-        imageUrl,
-      }),
-    });
-
-    if (response.ok) {
-      console.log(response);
-      console.log("게시글 생성 성공");
-      toast({
-        title: "게시글 생성 성공"
+    try {
+      const response = await fetch("/api/createboard", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "memberId": memberId || "",
+        },
+        body: JSON.stringify({
+          title,
+          body,
+          score: rating,
+          fairytaleId: selectedBook ? selectedBook.fairytaleId : 0,
+          imageUrl,
+        }),
       });
-      // 성공 후 /board로 이동
-      router.push("/board");
-    } else {
-      console.error("게시글 생성 실패");
+
+      // 208 상태 코드 처리 추가
+      if (response.status === 208) {
+        toast({
+          variant: "destructive",
+          title: "게시글 생성 실패",
+          description: "이미 생성된 게시글이 존재합니다."
+        });
+        return;
+      }
+
+      if (response.ok) {
+        console.log(response);
+        console.log("게시글 생성 성공");
+        toast({
+          title: "게시글 생성 성공"
+        });
+        // 성공 후 /board로 이동
+        router.push("/board");
+      } else {
+        console.log("게시글 생성 실패");
+        toast({
+          variant: "destructive",
+          title: "게시글 생성 실패",
+          description: await response.text()
+        });
+      }
+    } catch (error) {
+      console.error("게시글 생성 중 에러 발생:", error);
+      toast({
+        variant: "destructive",
+        title: "게시글 생성 실패",
+        description: "게시글 생성 중 오류가 발생했습니다."
+      });
     }
   };
 

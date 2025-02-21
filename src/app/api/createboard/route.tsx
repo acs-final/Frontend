@@ -35,7 +35,15 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify(reqBody),
     });
-    // console.log("externalResponse::::::::::::::::::::::::::::::::", externalResponse);
+    console.log("externalResponse::::::::::::::::::::::::::::::::dddd", externalResponse);
+
+    // 208 상태 코드 처리 추가
+    if (externalResponse.status === 208) {
+      return NextResponse.json({
+        isSuccess: false,
+        message: "이미 생성된 게시글이 존재합니다.",
+      }, { status: 208 });
+    }
 
     if (!externalResponse.ok) {
       console.log(
