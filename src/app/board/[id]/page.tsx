@@ -132,6 +132,8 @@ export default function ReviewPage() {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true); // ✅ 로딩 상태 추가
+  const [overallRating, setOverallRating] = useState(0); // 전체 평점
+  const [commentRating, setCommentRating] = useState(0); // 댓글용 평점
 
   // 현재 보여줄 평점: hover 상태가 있으면 hoverRating, 아니면 rating
   const currentRating = hoverRating || rating;
@@ -180,6 +182,7 @@ export default function ReviewPage() {
               editing: false, // ✅ 기본적으로 편집 모드가 비활성화 상태
             }))
           );
+          setOverallRating(data.result.score ?? 0); // 전체 평점 설정
           
         } else {
           console.error("❌ 게시글 불러오기 실패:", data.message || data);
@@ -296,7 +299,7 @@ export default function ReviewPage() {
   
     try {
       console.log(`📌 [프론트엔드] 댓글 등록 요청: /api/comment/${id}`);
-      console.log("📌 [프론트엔드] 요청 데이터:", { content: comment, score: rating });
+      console.log("📌 [프론트엔드] 요청 데이터:", { content: comment, score: commentRating });
   
       // ✅ 서버 API(`/api/comment/${id}`)로 `POST` 요청 보내기
       const res = await fetch(`/api/comment/${id}`, {
@@ -306,7 +309,7 @@ export default function ReviewPage() {
         },
         body: JSON.stringify({
           content: comment,
-          score: rating,
+          score: commentRating, // rating 대신 commentRating 사용
         }),
       });
   
@@ -326,13 +329,13 @@ export default function ReviewPage() {
           commentId: data.result.commentId, // API 응답에서 받은 commentId
           username: "익명 사용자", // API에서 사용자 정보를 안 주면 기본값 설정
           content: comment,
-          score: rating,
+          score: commentRating,
           createdAt: new Date().toISOString(), // 현재 시간 추가
         };
   
         setComments((prevComments: any) => [newComment, ...prevComments]); // 최신 댓글이 위에 추가됨
         setComment(""); // 입력 필드 초기화
-        setRating(0); // 별점 초기화
+        setCommentRating(0); // commentRating 초기화
       } else {
         console.warn("⚠️ 댓글 등록 실패:", data.message);
       }
@@ -382,6 +385,12 @@ return (
                 className="rounded-md"
               />
             </div>
+            {/* 전체 평점 표시 */}
+            <div className="flex items-center space-x-2 mt-4">
+              <span className="text-lg font-medium">전체 평점:</span>
+              <StarRating rating={overallRating} setRating={setOverallRating} readOnly />
+              <span className="text-lg">{overallRating.toFixed(1)} / 5</span>
+            </div>
           </div>
         </div>
       </div>
@@ -399,8 +408,8 @@ return (
       <div className="flex justify-between items-center mt-4">
         <div className="flex items-center space-x-2">
           <span className="text-lg font-medium">평점:</span>
-          <StarRating rating={rating} setRating={setRating} />
-          <span className="text-lg">{rating.toFixed(1)} / 5</span>
+          <StarRating rating={commentRating} setRating={setCommentRating} />
+          <span className="text-lg">{commentRating.toFixed(1)} / 5</span>
         </div>
         <Button onClick={handleCommentSubmit}>댓글 등록</Button>
       </div>

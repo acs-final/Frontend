@@ -10,6 +10,7 @@ interface Book {
   fairytaleId: string;
   imageUrl?: string;
   title: string;
+  siteUrl: string;
   // 추가 필드가 있다면 여기에 정의
 }
 
@@ -79,9 +80,9 @@ function BookRecommendationContent() {
             추천 도서 목록
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {books.map((book) => (
+            {books.map((book, index) => (
               <div
-                key={book.fairytaleId}
+                key={book.fairytaleId || `book-${index}`}
                 className="p-4 rounded-lg shadow-lg hover:scale-105 transition-transform duration-200"
               >
                 <div className="flex justify-center mb-4">
@@ -98,7 +99,7 @@ function BookRecommendationContent() {
                 </h3>
                 <div className="flex justify-center mt-4">
                   <Button asChild>
-                    <Link href={`/book/${book.fairytaleId}`}>자세히 보기</Link>
+                    <Link href={book.siteUrl || '#'}>자세히 보기</Link>
                   </Button>
                 </div>
               </div>

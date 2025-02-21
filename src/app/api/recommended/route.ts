@@ -21,7 +21,7 @@ export async function GET(request: Request) {
       : "http://192.168.2.141:8080/v1";
       
     // 외부 API 경로 (필요에 따라 "recommended" 혹은 "recommanded" 수정)
-    let externalApiUrl = `${baseExternalApiUrl}/fairytale/recommanded/`;
+    let externalApiUrl = `${baseExternalApiUrl}/bookstore/recommanded/`;
     
     // genre 값이 있을 경우 쿼리 파라미터로 추가
     if (genre) {

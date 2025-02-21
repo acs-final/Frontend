@@ -17,7 +17,8 @@ export async function POST(
 
     const cookieStore = await cookies();
     const memberCookie = cookieStore.get("memberCookie")?.value;
-    console.log("📌 [게시판 API] 가져온 memberCookie:", memberCookie);
+    console.log("comment/[id]/route memberCookie:", memberCookie);
+    // console.log("📌 [게시판 API] 가져온 memberCookie:", memberCookie);
 
     if (!memberCookie) {
       console.warn("❌ `memberCookie`가 없습니다.");
@@ -41,36 +42,64 @@ export async function POST(
 
     console.log("📌 [게시판 API] 받은 요청 데이터:", reqBody);
 
+    // reqBody 디버깅을 위한 상세 로깅 추가
+    console.log("📌 [게시판 API] reqBody 타입:", typeof reqBody);
+    console.log("📌 [게시판 API] reqBody 내용:", JSON.stringify(reqBody, null, 2));
+    console.log("📌 [게시판 API] content 존재 여부:", Boolean(reqBody?.content));
+    console.log("📌 [게시판 API] score 값:", reqBody?.score);
+
     if (!reqBody || !reqBody.content || reqBody.score == null) {
+      console.log("❌ [게시판 API] 유효성 검사 실패:", {
+        hasReqBody: Boolean(reqBody),
+        hasContent: Boolean(reqBody?.content),
+        hasScore: reqBody?.score != null
+      });
       return NextResponse.json(
         { isSuccess: false, code: "COMMON400", message: "❌ content와 score 값이 필요합니다." },
         { status: 400 }
       );
     }
 
-    // ✅ score 값이 0~5 사이, 0.5 단위인지 검증
-    if (reqBody.score < 0 || reqBody.score > 5 || reqBody.score % 0.5 !== 0) {
+    // ✅ score 값이 0~5 사이, 0.5 단위인지 검증 (더 엄격한 검증)
+    const score = Number(reqBody.score);
+    if (
+      isNaN(score) || 
+      score < 0 || 
+      score > 5 || 
+      !Number.isInteger(score * 2) // 0.5 단위 검증을 위한 더 정확한 방법
+    ) {
       return NextResponse.json(
-        { isSuccess: false, code: "COMMON400", message: "❌ score 값은 0~5 범위, 0.5 단위여야 합니다." },
+        { 
+          isSuccess: false, 
+          code: "COMMON400", 
+          message: "❌ score 값은 0~5 범위의 0.5 단위여야 합니다." 
+        },
         { status: 400 }
       );
     }
 
     console.log("📌 [게시판 API] 유효한 요청 데이터 확인 완료:", reqBody);
+    console.log("comment/[id]/route", reqBody);
 
-    // ✅ 외부 API URL 설정 변경 (환경변수 우선 사용)
+    // ✅ API 엔드포인트 수정 (/v1/comment/{bookstoreId})
     const externalApiBaseUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
     const externalApiUrl = `${externalApiBaseUrl}/comment/${id}`;
     console.log(`📌 [게시판 API] 외부 API 요청: ${externalApiUrl}`);
 
-    // ✅ 외부 API로 요청 보내기 (`memberCookie` 포함)
+    // ✅ 요청 본문 형식 맞추기
+    const requestBody = {
+      content: reqBody.content,
+      score: score // 검증된 score 값 사용
+    };
+
+    // ✅ 외부 API로 요청 보내기
     const externalResponse = await fetch(externalApiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "memberId": memberCookie, // ✅ 필수 헤더 추가
+        "memberId": memberCookie,
       },
-      body: JSON.stringify(reqBody), // ✅ JSON 변환 후 전송
+      body: JSON.stringify(requestBody),
     });
 
     if (!externalResponse.ok) {
