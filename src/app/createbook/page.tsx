@@ -558,7 +558,7 @@ function MainTestPage() {
               className="mb-4"
             />
             <div >
-              <p className="text-xl">ACS7th 안녕하세요</p>
+              <p className="text-xl">ACS7th delta 안녕하세요</p>
               <p className="text-xl">원하시는 동화책을</p>
               <p className="text-xl">원하는대로 만들어드려요</p>
             </div>
