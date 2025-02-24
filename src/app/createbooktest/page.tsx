@@ -136,42 +136,20 @@ function MainTestPage() {
     setIsLoading(true);
 
     try {
-      const memberId = sessionStorage.getItem("sub");
-      const accessToken = sessionStorage.getItem("accessToken");
-      console.log("page memberId:", memberId);
-      console.log("page accessToken:", accessToken);
-
-      // job이 있으면 job 값과 genre를 결합하여 새로운 genre를 생성
+      // job이 있으면 job 값과 genre를 결합
       const combinedGenre = data.job ? `${data.job} ${data.genre}` : data.genre;
 
-      const requestBody = {
-        genre: combinedGenre, // 결합된 장르 사용
+      // 쿼리 파라미터 구성
+      const queryParams = new URLSearchParams({
+        genre: combinedGenre,
         gender: data.gender,
-        theme: data.theme,
-      };
-
-      const response = await fetch("/api/createbook", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          memberId: memberId || "",
-        },
-        body: JSON.stringify(requestBody),
+        challenge: data.theme
+        // challenge: data.theme "easy" // 기본값으로 'easy' 설정
       });
 
-      if (!response.ok) {
-        throw new Error("유효한 동화 데이터가 없습니다.");
-      }
+      // loading 페이지로 리다이렉트 (쿼리스트링 포함)
+      window.location.href = `/loading?${queryParams.toString()}`;
 
-      const result = await response.json();
-      console.log("동화 생성 결과:", result);
-
-      // 동화 결과 처리는 내부 로직에서 삭제(동화책 페이지 미사용)
-      if (result && result.isSuccess && result.result && result.result.body) {
-        // 이후 동화책 데이터를 처리하는 부분은 제거합니다.
-      } else {
-        throw new Error("유효한 동화 데이터가 없습니다.");
-      }
     } catch (error) {
       console.error("동화 생성 중 에러:", error);
     } finally {
