@@ -84,10 +84,10 @@ const ModalPlaceholder = () => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white p-6 rounded-md text-center">
         <p className="mb-4">여기는 모달 대체 컴포넌트입니다.</p>
-        <Link href="/" shallow>
-          <a className="inline-block bg-blue-500 text-white py-2 px-4 rounded">
-            닫기
-          </a>
+        <Link
+        href="/"
+        shallow
+        className="inline-block bg-blue-500 text-white py-2 px-4 rounded">닫기
         </Link>
       </div>
     </div>
