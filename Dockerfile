@@ -7,7 +7,7 @@ ENV NEXT_PUBLIC_REDIRECT_URI=$NEXT_PUBLIC_REDIRECT_URI
 
 # package.json 복사 및 의존성 설치
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # 소스 전체 복사 및 빌드 실행
 COPY . .
