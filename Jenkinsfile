@@ -16,7 +16,7 @@ pipeline {
             }
         }
         
-        // "빌드 전" 소나큐브 분석 단계
+        // "빌드 전" 소나큐브 분석 단계aa
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('MySonarQube') {
