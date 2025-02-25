@@ -79,13 +79,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     navMain: [
       {
         title: "동화책 만들기",
-        url: "/createbook",
+        url: "/createbooktest",
         icon: Bot,
         isActive: true,
       },
       {
         title: "내 책방",
-        url: "/mybookstore",
+        url: "/gallery",
         icon: BookOpen,
       },
       {
