@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    // console.log("route.tsx 진입");
     // params는 Promise이므로 await를 통해 구조 분해합니다.
     const { id: reportId } = await params;
 
@@ -47,7 +46,6 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     // 원본 응답 객체에서 JSON 데이터 읽기
     const externalData = await externalResponse.json();
-    // console.log("route.tsx:", externalData);
 
     return NextResponse.json({
       isSuccess: externalData.isSuccess,

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import {  NextResponse } from "next/server";
 
 const externalApiUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
 

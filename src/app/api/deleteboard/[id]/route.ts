@@ -4,12 +4,10 @@ import { cookies } from "next/headers";
 
 export async function DELETE(request: Request) {
   try {
-    // console.log("route.tsx 진입");
     const cookieStore = await cookies();
     const memberCookie = cookieStore.get("memberCookie")?.value;
 
     // JSON 데이터를 파싱합니다.
-    // const reqBody = await request.json();
     const url = new URL(request.url);
     const id = url.pathname.split('/').pop() as string;
     
@@ -26,10 +24,7 @@ export async function DELETE(request: Request) {
         "memberId": memberCookie ?? "",
         // "name": "google_110277259246938366893",
       },
-      // 필요한 경우 request 데이터를 body에 포함시키세요.
-    //   body: JSON.stringify(reqBody),
     });
-    console.log("externalResponse:", externalResponse);
 
     if (!externalResponse.ok) {
       console.log(

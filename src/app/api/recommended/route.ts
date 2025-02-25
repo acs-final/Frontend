@@ -1,13 +1,12 @@
 // app/api/createbook/route.js (Next.js App Directory 방식)
 import { NextResponse } from "next/server";
-// import { cookies } from "next/headers";
 
 // 요청 데이터를 위한 타입 정의 (필요에 따라 확장 가능)
-type CreateBookRequest = {
-  genre?: string;
-  gender?: string;
-  challenge?: string;
-};
+// type CreateBookRequest = {
+//   genre?: string;
+//   gender?: string;
+//   challenge?: string;
+// };
 
 export async function GET(request: Request) {
   try {

@@ -4,7 +4,6 @@ import { cookies } from "next/headers";
 
 export async function GET(request: Request) {
   try {
-    // console.log("route.tsx 진입");
     const cookieStore = await cookies();
     const memberCookie = cookieStore.get("memberCookie")?.value;
 
@@ -23,12 +22,10 @@ export async function GET(request: Request) {
       headers: {
         "Content-Type": "application/json",
         "memberId": memberCookie ?? "",
-        // "name": "google_110277259246938366893",
       },
       // 필요한 경우 request 데이터를 body에 포함시키세요.
     //   body: JSON.stringify(reqBody),
     });
-    console.log("externalResponse:", externalResponse);
 
     if (!externalResponse.ok) {
       console.log(
@@ -41,7 +38,6 @@ export async function GET(request: Request) {
 
     // 외부 API 응답 데이터 읽기
     const externalData = await externalResponse.json();
-    // console.log("route.tsx:", externalData);
 
     return NextResponse.json({
       isSuccess: externalData.isSuccess,

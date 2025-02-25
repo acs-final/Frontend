@@ -47,8 +47,6 @@ export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  console.log("📌 [게시판 API] 댓글 추가 요청 수신");
-
   // 이제 params를 await로 사용하여 게시글 ID를 받아올 수 있습니다.
   const { id } = await params;
   if (!id) {
@@ -56,11 +54,9 @@ export async function POST(
   }
 
   const reqBody = await request.json();
-  console.log("📌 [게시판 API] 요청 데이터:", reqBody);
 
   const { content, score } = reqBody;
   if (!content || score == null) {
-    console.warn("❌ 댓글 내용과 점수가 비어 있습니다.");
     return NextResponse.json(
       {
         isSuccess: false,
@@ -73,7 +69,6 @@ export async function POST(
 
   const externalApiUrl =
     process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
-  console.log(`📌 [게시판 API] 외부 API 요청: ${externalApiUrl}/comment/${id}`);
   const externalResponse = await fetch(`${externalApiUrl}/comment/${id}`, {
     method: "POST",
     headers: {
@@ -95,7 +90,6 @@ export async function POST(
   }
 
   const externalData = await externalResponse.json();
-  console.log("📌 [게시판 API] 외부 API 응답 데이터:", externalData);
 
   return NextResponse.json(externalData, { status: 200 });
 }
