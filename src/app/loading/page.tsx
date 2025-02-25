@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 // 불필요한 부분을 제거하는 유틸 함수
@@ -17,7 +17,7 @@ function cleanLine(line: string) {
   return cleaned;
 }
 
-export default function LoadingPage() {
+function LoadingPageContent() {
   const [data, setData] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const searchParams = useSearchParams();
@@ -78,9 +78,7 @@ export default function LoadingPage() {
             // data: 로 시작하면 data: 제거 후 처리
             if (trimmed.startsWith("data:")) {
               let raw = trimmed.replace("data:", "").trim();
-              raw = raw
-                .replace(/\\n/g, "\n")
-                .replace(/\\"/g, '"');
+              raw = raw.replace(/\\n/g, "\n").replace(/\\"/g, '"');
               raw = cleanLine(raw);
               return raw;
             }
@@ -113,11 +111,17 @@ export default function LoadingPage() {
   return (
     <div>
       <h3>실시간 스트리밍 데이터</h3>
-
       {/* 요청한 데이터를 화면에 출력 */}
       <div style={{ whiteSpace: "pre-wrap" }}>{data}</div>
-
       {isStreaming && <p>스트리밍 중...</p>}
     </div>
+  );
+}
+
+export default function LoadingPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoadingPageContent />
+    </Suspense>
   );
 }

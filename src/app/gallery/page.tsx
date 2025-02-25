@@ -4,12 +4,10 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
-// "next/router" 대신 "next/navigation"의 useSearchParams를 사용합니다.
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
 import Bridge from "@/components/Icons/Bridge";
 import Logo from "@/components/Icons/Logo";
-import Modal from "@/components/Modal";
 import type { ImageProps } from "@/utils/types";
 import { useLastViewedPhoto } from "@/utils/useLastViewedPhoto";
 
@@ -80,8 +78,24 @@ const initialImages: ImageProps[] = [
   },
 ];
 
-const Home: NextPage = () => {
-  // next/navigation의 useSearchParams를 사용하여 query 파라미터 읽기
+// 모달 대신 사용할 간단한 오버레이 컴포넌트
+const ModalPlaceholder = () => {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-white p-6 rounded-md text-center">
+        <p className="mb-4">여기는 모달 대체 컴포넌트입니다.</p>
+        <Link href="/" shallow>
+          <a className="inline-block bg-blue-500 text-white py-2 px-4 rounded">
+            닫기
+          </a>
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+// HomeContent 컴포넌트는 useSearchParams()를 사용하므로 Suspense 내부에서 렌더링되어야 합니다.
+function HomeContent() {
   const searchParams = useSearchParams();
   const photoId = searchParams.get("photoId");
 
@@ -135,7 +149,6 @@ const Home: NextPage = () => {
         const res = await fetch(`/api/images?page=${page}`);
         if (res.ok) {
           const newImages: ImageProps[] = await res.json();
-          // 추가 데이터가 없을 경우 observer를 해제하는 등 추가 로직 필요
           setImages((prev) => [...prev, ...newImages]);
         }
       } catch (error) {
@@ -154,14 +167,8 @@ const Home: NextPage = () => {
         <meta name="twitter:image" content="/og-image.png" />
       </Head>
       <main className="mx-auto max-w-[1960px] p-4">
-        {photoId && (
-          <Modal
-            images={images}
-            onClose={() => {
-              setLastViewedPhoto(null);
-            }}
-          />
-        )}
+        {/* photoId가 있을 경우 모달 대신 대체 컴포넌트를 보여줍니다 */}
+        {photoId && <ModalPlaceholder />}
         <div className="columns-1 gap-4 sm:columns-2 xl:columns-3 2xl:columns-4">
           <div className="after:content relative mb-5 flex h-[629px] flex-col items-center justify-end gap-4 overflow-hidden rounded-lg bg-white/10 px-6 pb-16 pt-64 text-center text-white shadow-highlight after:pointer-events-none after:absolute after:inset-0 after:rounded-lg after:shadow-highlight lg:pt-0">
             <div className="absolute inset-0 flex items-center justify-center opacity-20">
@@ -210,6 +217,15 @@ const Home: NextPage = () => {
         </div>
       </main>
     </>
+  );
+}
+
+const Home: NextPage = () => {
+  return (
+    // Suspense 경계를 추가하여 useSearchParams() 사용 컴포넌트를 감쌉니다.
+    <Suspense fallback={<div>Loading gallery...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 };
 
