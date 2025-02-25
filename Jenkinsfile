@@ -34,6 +34,21 @@ pipeline {
                 }
             }
         }
+                // 2. Quality Gate 결과 확인
+        stage('Quality Gate') {
+            steps {
+                script {
+                    // 분석 결과가 처리될 때까지 대기 (기본적으로 최대 1분 기다림 등으로 설정 가능)
+                    timeout(time: 2, unit: 'MINUTES') {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            // 품질 게이트가 통과되지 않으면 빌드 실패 처리
+                            error "Pipeline aborted due to Quality Gate failure: ${qg.status}"
+                        }
+                    }
+                }
+            }
+        }
 
         stage('Login to Harbor') {
             steps {
