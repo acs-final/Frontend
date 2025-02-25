@@ -47,8 +47,9 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'harbor', usernameVariable: 'HARBOR_USER', passwordVariable: 'HARBOR_PASS')]) {
                     sh '''
+                    export DOCKER_TLS_VERIFY=1
+                    export DOCKER_CERT_PATH=/home/kevin/harbor-ca
                     echo "$HARBOR_PASS" | docker login \
-                    --tlsverify \
                     --tlscacert=/home/kevin/harbor-ca/ca.cert \
                     --tlscert=/home/kevin/harbor-ca/ca.cert \
                     --tlskey=/home/kevin/harbor-ca/ca.key \
