@@ -46,7 +46,15 @@ pipeline {
         stage('Login to Harbor') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'harbor', usernameVariable: 'HARBOR_USER', passwordVariable: 'HARBOR_PASS')]) {
-                    sh 'echo "$HARBOR_PASS" | docker login -u "$HARBOR_USER" --password-stdin 192.168.2.141:443'
+                    sh '''
+                    echo "$HARBOR_PASS" | docker login \
+                    --tlsverify \
+                    --tlscacert=/home/kevin/harbor-ca/ca.cert \
+                    --tlscert=/home/kevin/harbor-ca/ca.cert \
+                    --tlskey=/home/kevin/harbor-ca/ca.key \
+                    -u "$HARBOR_USER" \
+                    --password-stdin 192.168.2.141:443
+                    '''
                 }
             }
         }
