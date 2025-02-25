@@ -43,17 +43,7 @@ pipeline {
                 }
             }
         }
-        // stage('Login to Harbor') {
-        //     steps {
-        //         withCredentials([usernamePassword(credentialsId: 'harbor', usernameVariable: 'HARBOR_USER', passwordVariable: 'HARBOR_PASS')]) {
-        //             sh '''
-        //             export DOCKER_TLS_VERIFY=1
-        //             export DOCKER_CERT_PATH=/home/kevin/harbor-ca
-        //             echo "$HARBOR_PASS" | docker login -u "$HARBOR_USER" --password-stdin 192.168.2.141:443
-        //             '''
-        //         }
-        //     }
-        // }
+
 
         stage('Build Docker Image') {
             steps {
