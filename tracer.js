@@ -12,6 +12,9 @@ const sdk = new NodeSDK({
   instrumentations: [getNodeAutoInstrumentations()],
 });
 
-sdk.start()
-  .then(() => console.log('Tracing initialized'))
-  .catch((error) => console.log('Error initializing tracing', error));
+try {
+  sdk.start();
+  console.log('Tracing initialized');
+} catch (error) {
+  console.error('Error initializing tracing', error);
+}

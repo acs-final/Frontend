@@ -2,10 +2,10 @@
   "name": "moai",
   "version": "0.1.0",
   "private": true,
-  "scripts": {
-  "dev": "node -r ./tracer.js next dev --turbopack",
+"scripts": {
+  "dev": "node -r ./tracer.js ./node_modules/next/dist/bin/next dev --turbopack",
   "build": "next build",
-  "start": "node -r ./tracer.js next start",
+  "start": "node -r ./tracer.js ./node_modules/next/dist/bin/next start",
   "lint": "next lint"
 },
   "dependencies": {
