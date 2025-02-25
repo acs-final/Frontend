@@ -16,44 +16,44 @@ pipeline {
             }
         }
         
-        // "빌드 전" 소나큐브 분석 단계
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('MySonarQube') {
-                    script {
-                        def scannerHome = tool 'LocalSonarScanner'
-                        sh """
-                        ${scannerHome}/bin/sonar-scanner \
-                          -Dsonar.projectKey=my_project_key \
-                          -Dsonar.projectName=MyProject \
-                          -Dsonar.projectVersion=1.0 \
-                          -Dsonar.sources=. \
-                          -Dsonar.host.url=http://192.168.3.131:9000
-                        """
-                    }
-                }
-            }
-        }
-
-        // stage('Login to Harbor') {
+        // // "빌드 전" 소나큐브 분석 단계
+        // stage('SonarQube Analysis') {
         //     steps {
-        //         script {
-        //             // Harbor 로그인
-        //             sh "docker login -u ${HARBOR_CREDENTIALS_USR} -p ${HARBOR_CREDENTIALS_PSW} 192.168.2.141:443"
+        //         withSonarQubeEnv('MySonarQube') {
+        //             script {
+        //                 def scannerHome = tool 'LocalSonarScanner'
+        //                 sh """
+        //                 ${scannerHome}/bin/sonar-scanner \
+        //                   -Dsonar.projectKey=my_project_key \
+        //                   -Dsonar.projectName=MyProject \
+        //                   -Dsonar.projectVersion=1.0 \
+        //                   -Dsonar.sources=. \
+        //                   -Dsonar.host.url=http://192.168.3.131:9000
+        //                 """
+        //             }
         //         }
         //     }
         // }
+
         stage('Login to Harbor') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'harbor', usernameVariable: 'HARBOR_USER', passwordVariable: 'HARBOR_PASS')]) {
-                    sh '''
-                    export DOCKER_TLS_VERIFY=1
-                    export DOCKER_CERT_PATH=/home/kevin/harbor-ca
-                    echo "$HARBOR_PASS" | docker login -u "$HARBOR_USER" --password-stdin 192.168.2.141:443
-                    '''
+                script {
+                    // Harbor 로그인
+                    sh "docker login -u ${HARBOR_CREDENTIALS_USR} -p ${HARBOR_CREDENTIALS_PSW} 192.168.2.141:443"
                 }
             }
         }
+        // stage('Login to Harbor') {
+        //     steps {
+        //         withCredentials([usernamePassword(credentialsId: 'harbor', usernameVariable: 'HARBOR_USER', passwordVariable: 'HARBOR_PASS')]) {
+        //             sh '''
+        //             export DOCKER_TLS_VERIFY=1
+        //             export DOCKER_CERT_PATH=/home/kevin/harbor-ca
+        //             echo "$HARBOR_PASS" | docker login -u "$HARBOR_USER" --password-stdin 192.168.2.141:443
+        //             '''
+        //         }
+        //     }
+        // }
 
         stage('Build Docker Image') {
             steps {
