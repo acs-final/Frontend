@@ -1,5 +1,5 @@
 export default function downloadPhoto(url: string, filename: string) {
-  const finalFilename = filename || url.split("\\").pop()?.split("/").pop() || "download";
+  const finalFilename = filename ?? url.split("\\").pop()?.split("/").pop() ?? "download";
   fetch(url, {
     headers: new Headers({
       Origin: location.origin,
