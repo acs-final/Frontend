@@ -15,6 +15,26 @@ pipeline {
                     url: 'https://github.com/acs-final/Frontend.git'  // GitHub 저장소 URL
             }
         }
+        // "빌드 전" 소나큐브 분석 단계
+        stage('SonarQube Analysis') {
+            steps {
+                // Jenkins에 등록한 SonarQube 서버 이름을 넣어주세요 (예: 'My SonarQube')
+                withSonarQubeEnv('MySonarQube') {
+                    // Global Tool Configuration에 등록한 스캐너 이름(예: 'LocalSonarScanner')
+                    def scannerHome = tool 'LocalSonarScanner'
+                    
+                    sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                      -Dsonar.projectKey=my_project_key \
+                      -Dsonar.projectName=MyProject \
+                      -Dsonar.projectVersion=1.0 \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=http://192.168.3.131:9000
+                      // (필요 시) -Dsonar.login=${SONAR_TOKEN}
+                    """
+                }
+            }
+        }
 
         stage('Login to Harbor') {
             steps {
