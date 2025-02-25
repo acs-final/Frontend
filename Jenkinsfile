@@ -16,24 +16,24 @@ pipeline {
             }
         }
         
-        // // "빌드 전" 소나큐브 분석 단계
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         withSonarQubeEnv('MySonarQube') {
-        //             script {
-        //                 def scannerHome = tool 'LocalSonarScanner'
-        //                 sh """
-        //                 ${scannerHome}/bin/sonar-scanner \
-        //                   -Dsonar.projectKey=my_project_key \
-        //                   -Dsonar.projectName=MyProject \
-        //                   -Dsonar.projectVersion=1.0 \
-        //                   -Dsonar.sources=. \
-        //                   -Dsonar.host.url=http://192.168.3.131:9000
-        //                 """
-        //             }
-        //         }
-        //     }
-        // }
+        // "빌드 전" 소나큐브 분석 단계
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('MySonarQube') {
+                    script {
+                        def scannerHome = tool 'LocalSonarScanner'
+                        sh """
+                        ${scannerHome}/bin/sonar-scanner \
+                          -Dsonar.projectKey=my_project_key \
+                          -Dsonar.projectName=MyProject \
+                          -Dsonar.projectVersion=1.0 \
+                          -Dsonar.sources=. \
+                          -Dsonar.host.url=http://192.168.3.131:9000
+                        """
+                    }
+                }
+            }
+        }
 
         stage('Login to Harbor') {
             steps {
