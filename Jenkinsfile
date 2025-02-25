@@ -39,7 +39,7 @@ pipeline {
             steps {
                 script {
                     // 분석 결과가 처리될 때까지 대기 (기본적으로 최대 1분 기다림 등으로 설정 가능)
-                    timeout(time: 2, unit: 'MINUTES') {
+                    timeout(time: 10, unit: 'MINUTES') {
                         def qg = waitForQualityGate()
                         if (qg.status != 'OK') {
                             // 품질 게이트가 통과되지 않으면 빌드 실패 처리
