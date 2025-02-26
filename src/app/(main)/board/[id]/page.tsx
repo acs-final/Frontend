@@ -5,8 +5,6 @@ import { useParams } from "next/navigation";
 import { Input } from "@/app/(main)/components/ui/input";
 import { Button } from "@/app/(main)/components/ui/button";
 import { Textarea } from "@/app/(main)/components/ui/textarea"
-import { Badge } from "@/app/(main)/components/ui/badge"
-import { DollarSign } from "lucide-react";
 import Image from "next/image";
 
 

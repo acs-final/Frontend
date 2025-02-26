@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image"
 import Link from "next/link";
-
-import { Button } from "@/app/(main)/components/ui/button"
 import {
   Card,
   CardContent,
@@ -25,13 +23,6 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/app/(main)/components/ui/chart";
-// import { CalendarDateRangePicker } from "@/app/(app)/examples/dashboard/components/date-range-picker"
-// import { MainNav } from "@/app/(app)/examples/dashboard/components/main-nav"
-// import { Overview } from "@/app/(app)/examples/dashboard/components/overview"
-// import { RecentSales } from "@/app/(app)/examples/dashboard/components/recent-sales"
-// import { Search } from "@/app/(app)/examples/dashboard/components/search"
-// import TeamSwitcher from "@/app/(app)/examples/dashboard/components/team-switcher"
-// import { UserNav } from "@/app/(app)/examples/dashboard/components/user-nav"
 
 type DashboardData = {
   todayVisitor: number;
