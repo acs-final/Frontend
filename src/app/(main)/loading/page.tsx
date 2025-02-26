@@ -6,14 +6,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 // 불필요한 부분을 제거하는 유틸 함수
 function cleanLine(line: string) {
   let cleaned = line;
-  // 1) 중괄호 제거
-  cleaned = cleaned.replace(/[{}]/g, "");
-  // 2) 특정 키워드(page, title, body, prompt, fairytaleId) 제거
-  cleaned = cleaned.replace(/\b(page|title|body|prompt|fairytaleId)\b["\s:]*/gi, "");
-  // 3) 따옴표 제거
-  cleaned = cleaned.replace(/"/g, "");
-  // 4) 남은 중복 공백 정리
-  cleaned = cleaned.replace(/\s+/g, " ").trim();
+  cleaned = cleaned.replace(/[{}]/g, ""); // 중괄호 제거
+  cleaned = cleaned.replace(/\b(page|title|body|prompt|fairytaleId)\b["\s:]*/gi, ""); // 특정 키워드 제거
+  cleaned = cleaned.replace(/"/g, ""); // 따옴표 제거
+  cleaned = cleaned.replace(/\s+/g, " ").trim(); // 중복 공백 정리
   return cleaned;
 }
 
@@ -27,7 +23,6 @@ function LoadingPageContent() {
     const fetchData = async () => {
       setIsStreaming(true);
 
-      // URL 쿼리 파라미터에서 값 추출
       const genre = searchParams.get("genre") || "";
       const gender = searchParams.get("gender") || "";
       const challenge = searchParams.get("challenge") || "easy";
@@ -41,11 +36,7 @@ function LoadingPageContent() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          genre,
-          gender,
-          challenge,
-        }),
+        body: JSON.stringify({ genre, gender, challenge }),
       });
 
       const reader = response.body?.getReader();
@@ -64,29 +55,27 @@ function LoadingPageContent() {
             setIsStreaming(false);
             break;
           }
-          // 수신된 청크를 문자열로 디코딩
           const chunkValue = decoder.decode(value, { stream: true });
-          // SSE는 '\n' 단위로 "event:" 또는 "data:" 등이 나뉘므로 줄 단위로 처리
           const lines = chunkValue.split("\n");
 
           const cleanedLines = lines.map((line) => {
             const trimmed = line.trim();
-            // event: 로 시작하는 줄은 무시
-            if (trimmed.startsWith("event:")) {
-              return "";
-            }
-            // data: 로 시작하면 data: 제거 후 처리
+            if (trimmed.startsWith("event:")) return "";
             if (trimmed.startsWith("data:")) {
               let raw = trimmed.replace("data:", "").trim();
               raw = raw.replace(/\\n/g, "\n").replace(/\\"/g, '"');
-              raw = cleanLine(raw);
-              return raw;
+              return cleanLine(raw);
             }
             return "";
           });
 
           const finalChunkValue = cleanedLines.join(" ");
-          setData((prev) => prev + " " + finalChunkValue);
+
+          // 🔹 새로운 데이터를 추가하되, 최근 500자까지만 유지
+          setData((prev) => {
+            const updatedText = (prev + " " + finalChunkValue).trim();
+            return updatedText.length > 500 ? updatedText.slice(-500) : updatedText;
+          });
         }
       } catch (error) {
         console.error("스트리밍 중 오류 발생:", error);
@@ -97,10 +86,8 @@ function LoadingPageContent() {
     fetchData();
   }, [searchParams]);
 
-  // 스트리밍 완료 후, data에 "스트리밍 완료 [숫자]" 패턴이 있으면 리다이렉트
   useEffect(() => {
     if (!isStreaming && data) {
-      // 예: "스트리밍 완료 128" 에서 128 추출
       const match = data.match(/스트리밍\s*완료\s*(\d+)/);
       if (match && match[1]) {
         router.push(`/booktest/${match[1]}`);
@@ -109,11 +96,11 @@ function LoadingPageContent() {
   }, [isStreaming, data, router]);
 
   return (
-    <div>
-      <h3>실시간 스트리밍 데이터</h3>
-      {/* 요청한 데이터를 화면에 출력 */}
-      <div style={{ whiteSpace: "pre-wrap" }}>{data}</div>
-      {isStreaming && <p>스트리밍 중...</p>}
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <div className="w-full max-w-2xl p-4 border rounded-md shadow-md bg-white">
+        <div className="text-lg font-semibold whitespace-pre-wrap">{data}</div>
+      </div>
+      {isStreaming && <p className="mt-4 text-blue-500"></p>}
     </div>
   );
 }
