@@ -1,10 +1,10 @@
 pipeline {
     agent any
     environment {
-        BUILD_NUMBER = "v8"  // 빌드 번호
-        IMAGE_NAME = "192.168.2.141:443/prototype/moai-front"  // Harbor 이미지 경로
+        BUILD_NUMBER = "v9"  // 빌드 번호
+        IMAGE_NAME = "192.168.2.141:443/k8s-project/moai-front"  // Harbor 이미지 경로
         HARBOR_CREDENTIALS = credentials('harbor') // Jenkins에 등록한 Harbor Credentials ID
-        NEXT_PUBLIC_REDIRECT_URI = "https://b693-118-218-200-33.ngrok-free.app/cognitoresponse" 
+        NEXT_PUBLIC_REDIRECT_URI = "https://5b71-118-218-200-33.ngrok-free.app/cognitoresponse" 
     }
 
     stages {

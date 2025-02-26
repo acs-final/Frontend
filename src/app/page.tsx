@@ -1,30 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { LoginForm } from "@/components/login-form"
+import { useEffect } from 'react';
 
-export default function Page() {
-  const router = useRouter();
-
+export default function CognitoPage() {
   useEffect(() => {
-    // sessionStorage에서 "accesstoken"을 확인하고, 값이 있으면 대시보드로 이동합니다.
-    // const color = sessionStorage.getItem("color");
-    const sub = sessionStorage.getItem("sub");
-    // console.log("루트 page color:", color);
-    // console.log("token:", token);
-    // console.log("sub:", sub);
+    // 환경변수에 설정된 값을 인코딩해서 redirect_uri에 사용합니다.
+    const redirectURI = encodeURIComponent(process.env.NEXT_PUBLIC_REDIRECT_URI || "");
+    
+    window.location.replace(
+      `https://ap-northeast-2lod1czvcj.auth.ap-northeast-2.amazoncognito.com/login/continue?client_id=66m5dp0ut61tqrjhvdc10i7tam&redirect_uri=${redirectURI}&response_type=code&scope=email+openid+phone`
+    );
+  }, []);
 
-    if (sub) {
-      router.push("/dashboard");
-    }
-  }, [router]);
-
-  return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <LoginForm />
-      </div>
-    </div>
-  )
+  return null;
 }
+
