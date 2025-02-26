@@ -61,7 +61,7 @@ export default function MyPage() {
             username: json.result.username ?? "",
             nickname: json.result.nickname ?? "",
             credit: json.result.credit ?? 0, // credit의 경우 0 또는 원하는 기본값
-            childAge: json.result.childAge != null ? json.result.childAge : 0,
+            childAge: json.result.childAge ?? 0,
           });
           setUsername(json.result.username ?? "");
           setNickname(json.result.nickname ?? "");
@@ -154,7 +154,7 @@ export default function MyPage() {
               <form onSubmit={handleUpdate} className="space-y-4">
                 {/* 구글 ID 필드 (닉네임 위에 위치하며 수정 가능) */}
                 <div>
-                  <label className="block text-lg font-semibold mb-2">구글 ID</label>
+                  <label htmlFor="username" className="block text-lg font-semibold mb-2">구글 ID</label>
                   <input
                     type="text"
                     value={username}
@@ -164,7 +164,7 @@ export default function MyPage() {
                 </div>
                 {/* 닉네임 필드 */}
                 <div>
-                  <label className="block text-lg font-semibold mb-2">닉네임</label>
+                  <label htmlFor="nickname" className="block text-lg font-semibold mb-2">닉네임</label>
                   <input
                     type="text"
                     value={nickname}
@@ -174,7 +174,7 @@ export default function MyPage() {
                 </div>
                 {/* 자녀 나이 필드 */}
                 <div>
-                  <label className="block text-lg font-semibold mb-2">자녀 나이</label>
+                  <label htmlFor="childage"className="block text-lg font-semibold mb-2">자녀 나이</label>
                   <input
                     type="text"
                     value={childAge}
@@ -184,7 +184,7 @@ export default function MyPage() {
                 </div>
                 {/* 배경색 선택 필드 */}
                 <div>
-                  <label className="block text-lg font-semibold mb-2">배경색상</label>
+                  <label htmlFor="backgroundcolor" className="block text-lg font-semibold mb-2">배경색상</label>
                   <div className="flex space-x-4 mt-2">
                     {colors.map((color) => (
                       <button
@@ -202,7 +202,7 @@ export default function MyPage() {
 
               {/* 크레딧 정보 (읽기 전용) */}
               <div>
-                <label className="block text-lg font-semibold mb-2">크레딧</label>
+                <label htmlFor="credit" className="block text-lg font-semibold mb-2">크레딧</label>
                 <input
                   type="text"
                   value={account.credit ?? ""}

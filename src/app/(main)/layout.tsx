@@ -2,20 +2,10 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { ThemeProviderWrapper } from "./ThemeProvider"; // 위에서 만든 ThemeProvider 불러오기
 import ClientProviders from "./ClientProviders";
 
 // page.tsx 에서 사용한 추가 컴포넌트들
 import { AppSidebar } from "@/app/(main)/components/app-sidebar";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/app/(main)/components/ui/breadcrumb";
-import { Separator } from "@/app/(main)/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,

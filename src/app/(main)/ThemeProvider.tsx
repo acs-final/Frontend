@@ -5,9 +5,9 @@ import React, { useEffect, useState } from "react";
 
 export function ThemeProviderWrapper({
   children,
-}: {
+}: Readonly<{
   children: React.ReactNode;
-}) {
+}>) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
