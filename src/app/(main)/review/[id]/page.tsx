@@ -5,11 +5,9 @@ import { useParams, useRouter } from "next/navigation";
 import { Input } from "@/app/(main)/components/ui/input";
 import { Button } from "@/app/(main)/components/ui/button";
 import { Textarea } from "@/app/(main)/components/ui/textarea"
-import { Badge } from "@/app/(main)/components/ui/badge"
-import { DollarSign } from "lucide-react";
 import Image from "next/image";
 import { Toaster } from "@/app/(main)/components/ui/toaster"
-import { toast, useToast } from "@/app/(main)/hooks/use-toast";
+import { toast } from "@/app/(main)/hooks/use-toast";
 
 
 

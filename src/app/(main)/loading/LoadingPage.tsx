@@ -87,9 +87,9 @@ function LoadingPageContent() {
   useEffect(() => {
     if (!isStreaming && data) {
       const match = data.match(/스트리밍\s*완료\s*(\d+)/);
-      if (match && match[1]) {
+      if (match?.[1]) {
         router.push(`/booktest/${match[1]}`);
-      }
+      }      
     }
   }, [isStreaming, data, router]);
 
