@@ -2,7 +2,10 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import LottieLoader from "./Lottieloader"; // Lottie 애니메이션 가져오기
+import dynamic from "next/dynamic";
+
+// LottieLoader를 동적으로 불러오되, SSR은 하지 않도록 설정
+const LottieLoader = dynamic(() => import("./Lottieloader"), { ssr: false });
 
 function cleanLine(line: string) {
   let cleaned = line;
@@ -103,7 +106,7 @@ function LoadingPageContent() {
       </div>
 
       {/* 스트리밍 중 표시 */}
-      
+      {isStreaming && <p className="text-blue-500">스트리밍 중...</p>}
     </div>
   );
 }
