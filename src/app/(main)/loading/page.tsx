@@ -2,14 +2,14 @@
 
 import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import LottieLoader from "./Lottieloader"; // Lottie 애니메이션 가져오기
 
-// 불필요한 부분을 제거하는 유틸 함수
 function cleanLine(line: string) {
   let cleaned = line;
-  cleaned = cleaned.replace(/[{}]/g, ""); // 중괄호 제거
-  cleaned = cleaned.replace(/\b(page|title|body|prompt|fairytaleId)\b["\s:]*/gi, ""); // 특정 키워드 제거
-  cleaned = cleaned.replace(/"/g, ""); // 따옴표 제거
-  cleaned = cleaned.replace(/\s+/g, " ").trim(); // 중복 공백 정리
+  cleaned = cleaned.replace(/[{}]/g, "");
+  cleaned = cleaned.replace(/\b(page|title|body|prompt|fairytaleId)\b["\s:]*/gi, "");
+  cleaned = cleaned.replace(/"/g, "");
+  cleaned = cleaned.replace(/\s+/g, " ").trim();
   return cleaned;
 }
 
@@ -22,7 +22,6 @@ function LoadingPageContent() {
   useEffect(() => {
     const fetchData = async () => {
       setIsStreaming(true);
-
       const genre = searchParams.get("genre") || "";
       const gender = searchParams.get("gender") || "";
       const challenge = searchParams.get("challenge") || "easy";
@@ -33,9 +32,7 @@ function LoadingPageContent() {
 
       const response = await fetch("/api/loading", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ genre, gender, challenge }),
       });
 
@@ -70,8 +67,6 @@ function LoadingPageContent() {
           });
 
           const finalChunkValue = cleanedLines.join(" ");
-
-          // 🔹 새로운 데이터를 추가하되, 최근 500자까지만 유지
           setData((prev) => {
             const updatedText = (prev + " " + finalChunkValue).trim();
             return updatedText.length > 500 ? updatedText.slice(-500) : updatedText;
@@ -96,11 +91,19 @@ function LoadingPageContent() {
   }, [isStreaming, data, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <div className="w-full max-w-2xl p-4 border rounded-md shadow-md bg-white">
+    <div className="flex flex-col items-center justify-start min-h-screen p-4">
+      {/* Lottie 애니메이션 */}
+      <div className="w-28 h-28 md:w-36 md:h-36 mb-4">
+        <LottieLoader />
+      </div>
+
+      {/* 스트리밍 데이터 박스 */}
+      <div className="w-full max-w-lg p-4 border rounded-md shadow-md bg-white text-center mb-4">
         <div className="text-lg font-semibold whitespace-pre-wrap">{data}</div>
       </div>
-      {isStreaming && <p className="mt-4 text-blue-500"></p>}
+
+      {/* 스트리밍 중 표시 */}
+      
     </div>
   );
 }

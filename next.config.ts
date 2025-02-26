@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
       "image.yes24.com",
     ],
   },
-  /* config options here */
+  /* 추가 설정이 있다면 여기에 작성 */
 };
 
 export default nextConfig;
