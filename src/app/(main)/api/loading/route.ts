@@ -6,8 +6,8 @@ export async function POST(request: NextRequest) {
   const cookieStore = await cookies();
   const memberCookie = cookieStore.get("memberCookie")?.value;
 
-//   const baseApiUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8088/v1";
-  const baseApiUrl = "http://192.168.2.141:8088/v1";
+  const baseApiUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+  // const baseApiUrl = "http://192.168.2.141:8080/v1";
 
   // baseApiUrl의 마지막 '/'가 있으면 제거 후 '/fairytale/sonnet' 경로 추가
   const externalApiUrl = `${baseApiUrl.replace(/\/$/, "")}/fairytale/sonnet/streaming`;

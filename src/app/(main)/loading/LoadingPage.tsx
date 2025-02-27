@@ -101,7 +101,7 @@ function LoadingPageContent() {
       </div>
 
       {/* 스트리밍 데이터 박스 */}
-      <div className="w-full max-w-lg p-4 border rounded-md shadow-md bg-white text-center mb-4">
+      <div className="w-full md:w-[60%] mx-auto p-4 border rounded-md shadow-md bg-white text-center mb-4">
         <div className="text-lg font-semibold whitespace-pre-wrap">{data}</div>
       </div>
 
