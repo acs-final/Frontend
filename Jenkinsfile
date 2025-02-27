@@ -4,7 +4,7 @@ pipeline {
         BUILD_NUMBER = "v11"  // 빌드 번호
         IMAGE_NAME = "192.168.2.141:443/k8s-project/moai-front"  // Harbor 이미지 경로
         HARBOR_CREDENTIALS = credentials('harbor') // Jenkins에 등록한 Harbor Credentials ID
-        NEXT_PUBLIC_REDIRECT_URI = "https://ff29-118-218-200-33.ngrok-free.app/cognitoresponse" 
+        NEXT_PUBLIC_REDIRECT_URI = "https://b4c2-118-218-200-33.ngrok-free.app/cognitoresponse" 
     }
 
     stages {
