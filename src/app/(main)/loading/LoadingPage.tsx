@@ -106,7 +106,7 @@ function LoadingPageContent() {
       </div>
 
       {/* 스트리밍 중 표시 */}
-      {isStreaming && <p className="text-blue-500">스트리밍 중...</p>}
+      {isStreaming && <p className="text-blue-500"></p>}
     </div>
   );
 }
