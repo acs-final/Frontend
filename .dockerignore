@@ -5,3 +5,5 @@ npm-debug.log
 .gitignore
 .env
 .next
+.next/cache
+.DS_Store
