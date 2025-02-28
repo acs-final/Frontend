@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        BUILD_NUMBER = "v23"  // 빌드 번호
+        BUILD_NUMBER = "v24"  // 빌드 번호
         IMAGE_NAME = "192.168.2.141:443/k8s-project/moai-front"  // Harbor 이미지 경로
         HARBOR_CREDENTIALS = credentials('harbor') // Jenkins에 등록한 Harbor Credentials ID
         NEXT_PUBLIC_REDIRECT_URI = "https://a7aa-118-218-200-33.ngrok-free.app/cognitoresponse" 
@@ -78,7 +78,7 @@ pipeline {
         stage('K8S Manifest Update') {
             steps {
                 // Kubernetes manifest 레포지토리 체크아웃
-                git credentialsId: 'github-token',  // 동일한 GitHub 토큰 사용 (필요 시 별도 ID로 수정)
+                git credentialsId: 'github-token-wy',  // 동일한 GitHub 토큰 사용 (필요 시 별도 ID로 수정)
                     url: 'https://github.com/acs-final/Frontend-manifest.git',
                     branch: 'main'
                 
