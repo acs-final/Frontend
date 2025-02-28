@@ -18,8 +18,8 @@ FROM node:23-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV OTEL_SERVICE_NAME=frontend-service
-ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://opentelemetry-collector.monitoring:4317
+# ENV OTEL_SERVICE_NAME=frontend-service
+# ENV OTEL_EXPORTER_OTLP_ENDPOINT=http://opentelemetry-collector.monitoring:4317
 
 # standalone 모드로 빌드된 파일만 복사
 COPY --from=builder /app/.next/standalone/ ./
@@ -32,5 +32,5 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
-# CMD ["node", "server.js"]
-CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
+# CMD ["npm", "run", "start"]
