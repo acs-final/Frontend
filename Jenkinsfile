@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        BUILD_NUMBER = "v18"  // 빌드 번호
+        BUILD_NUMBER = "v19"  // 빌드 번호
         IMAGE_NAME = "192.168.2.141:443/k8s-project/moai-front"  // Harbor 이미지 경로
         HARBOR_CREDENTIALS = credentials('harbor') // Jenkins에 등록한 Harbor Credentials ID
         NEXT_PUBLIC_REDIRECT_URI = "https://a7aa-118-218-200-33.ngrok-free.app/cognitoresponse" 
@@ -16,7 +16,7 @@ pipeline {
             }
         }
         
-        // "빌드 전" 소나큐브 분석 단계aa
+        // "빌드 전" 소나큐브 분석 단계
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('MySonarQube') {
@@ -49,7 +49,6 @@ pipeline {
         //         }
         //     }
         // }
-
         stage('Login to Harbor') {
             steps {
                 script {
@@ -58,7 +57,6 @@ pipeline {
                 }
             }
         }
-
 
         stage('Build Docker Image') {
             steps {
@@ -76,6 +74,35 @@ pipeline {
                 echo "Push Success"
             }
         }
+
+        stage('K8S Manifest Update') {
+            steps {
+                // Kubernetes manifest 레포지토리 체크아웃
+                git credentialsId: 'github-token',  // 동일한 GitHub 토큰 사용 (필요 시 별도 ID로 수정)
+                    url: 'https://github.com/acs-final/Frontend-manifest.git',
+                    branch: 'main'
+                
+                // Git 설정
+                sh 'git config user.email "wy930914@naver.com"'
+                sh 'git config user.name "wy"'
+
+                // 최신 상태로 업데이트
+                sh 'git pull --rebase origin main'
+
+                // manifests 디렉토리에서 deploy.yaml 파일 수정
+                dir('manifests') {
+                    sh """
+                        sed -i 's|image: 192.168.2.141:443/k8s-project/moai-front:.*|image: 192.168.2.141:443/k8s-project/moai-front:${BUILD_NUMBER}|g' deploy.yaml
+                        git add deploy.yaml
+                        git commit -m '[UPDATE] moai-front ${BUILD_NUMBER} image versioning' || echo 'No changes to commit'
+                    """
+                }
+
+                // GitHub에 푸시
+                sshagent(credentials: ['github-token']) {  // SSH 방식 사용 시 별도 SSH 키 필요, 여기서는 HTTPS 기반으로 가정
+                    sh "git push origin main"
+                }
+            }
+        }
     }
-    
 }
