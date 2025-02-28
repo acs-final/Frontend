@@ -86,14 +86,10 @@ function LoadingPageContent() {
 
   useEffect(() => {
     if (!isStreaming && data) {
-      try {
-        const parsedData = JSON.parse(`{${data}}`); // JSON 형식으로 변환
-        if (parsedData.fairytaleId) {
-          router.push(`/booktest/${parsedData.fairytaleId}`);
-        }
-      } catch (error) {
-        console.error("JSON 파싱 오류:", error);
-      }
+      const match = data.match(/스트리밍\s*완료\s*(\d+)/);
+      if (match?.[1]) {
+        router.push(`/booktest/${match[1]}`);
+      }      
     }
   }, [isStreaming, data, router]);
   
