@@ -55,6 +55,21 @@ export default function BookDetailPage() {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [audioLoaded, setAudioLoaded] = useState(false);
 
+  // 데이터가 완전히 로드되었는지 확인하는 함수
+  const isDataComplete = (data: BookData | null) => {
+    if (!data) return false;
+    const hasBody = data.body && Object.keys(data.body).length > 0;
+    const hasImages =
+      data.imageUrl &&
+      data.imageUrl.length > 0 &&
+      data.imageUrl.every((img) => img.imageUrl !== null);
+    const hasMp3s =
+      data.mp3Url &&
+      data.mp3Url.length > 0 &&
+      data.mp3Url.every((mp3) => mp3.mp3Url !== null);
+    return hasBody && hasImages && hasMp3s;
+  };
+
   // API 호출 함수
   const fetchBookData = async () => {
     if (!id) return;
@@ -66,7 +81,6 @@ export default function BookDetailPage() {
       const data: ApiResponse = await response.json();
       if (data.isSuccess) {
         setBookData((prev) => {
-          // 이전 데이터와 비교해 null이 아닌 값으로만 업데이트
           const newData = { ...data.result };
           if (prev) {
             newData.imageUrl =
@@ -90,15 +104,26 @@ export default function BookDetailPage() {
     }
   };
 
-  // 초기 데이터 로드 및 0.5초마다 polling
+  // 초기 데이터 로드 및 조건부 polling
   useEffect(() => {
     fetchBookData(); // 초기 로드
-    const interval = setInterval(() => {
-      fetchBookData(); // 0.5초마다 호출
-    }, 500);
 
-    return () => clearInterval(interval); // 컴포넌트 언마운트 시 정리
-  }, [id]);
+    let interval: NodeJS.Timeout | null = null;
+    if (!isDataComplete(bookData)) {
+      interval = setInterval(() => {
+        fetchBookData(); // 0.5초마다 호출
+      }, 500);
+    }
+
+    // 데이터가 완전하면 interval 정리
+    if (isDataComplete(bookData) && interval) {
+      clearInterval(interval);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval); // 컴포넌트 언마운트 시 정리
+    };
+  }, [id, bookData]); // bookData가 변경될 때마다 체크
 
   const pages =
     bookData && bookData.body

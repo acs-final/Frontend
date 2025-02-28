@@ -7,3 +7,4 @@ npm-debug.log
 .next
 .next/cache
 .DS_Store
+Dockerfile_bak
