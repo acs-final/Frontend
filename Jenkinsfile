@@ -77,28 +77,5 @@ pipeline {
             }
         }
     }
-        //     stage('K8S Manifest Update') {
-        //     steps {
-        //         // GitHub에서 Kubernetes manifest 레포지토리 체크아웃
-        //         git credentialsId: 'github_access_token',
-        //             url: 'https://github.com/JONBERMAN/k8s-manifest.git',
-        //             branch: 'main'
-        //         sh 'git config user.email "jenkins@yourdomain.com"'
-        //         sh 'git config user.name "Jenkins CI"'
-        //         // deployment.yaml 파일의 버전 정보를 현재 빌드 번호로 업데이트
-        //         sh """
-        //             sed -i 's|image: taehoon981/grey:.*|image: taehoon981/grey:v${BUILD_NUMBER}|g' deployment.yaml
-        //         """
-        //         // Git에 변경 사항 추가
-        //         sh "git add deployment.yaml"
-        //         sh "git commit -m '[UPDATE] my-app ${BUILD_NUMBER} image versioning'"
-
-        //         // SSH로 GitHub에 푸시
-        //         sshagent(credentials: ['k8s-manifest-credential']) {
-        //             sh "git remote set-url origin git@github.com:JONBERMAN/k8s-manifest.git"
-        //             sh "git push -u origin main"
-        //         }
-        //     }
-        // }
-    }
+    
 }
