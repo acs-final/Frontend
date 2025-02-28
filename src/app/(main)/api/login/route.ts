@@ -18,8 +18,6 @@ export async function POST(request: Request) {
         "Content-Type": "application/json",
         "memberId": memberCookie ?? "",
       },
-      // 필요한 경우 request 데이터를 body에 포함시키세요.
-      // body: JSON.stringify(reqBody),
     });
 
     if (!externalResponse.ok) {
@@ -33,7 +31,6 @@ export async function POST(request: Request) {
 
     // 외부 API 응답 데이터 읽기
     const externalData = await externalResponse.json();
-    // console.log("route.tsx:", externalData);
 
     return NextResponse.json({
       isSuccess: externalData.isSuccess,

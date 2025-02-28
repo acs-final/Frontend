@@ -13,13 +13,11 @@ type CreateBoardRequest = {
 
 export async function POST(request: Request) {
   try {
-    // console.log("route.tsx 진입");
     const cookieStore = await cookies();
     const memberCookie = cookieStore.get("memberCookie")?.value;
 
     // 요청 본문을 업데이트된 타입으로 파싱
     const reqBody: CreateBoardRequest = await request.json();
-    console.log("reqBody::::::::::::::::::::::::::::::::", reqBody);
 
     // 기본 EXTERNAL_API_URL을 "http://192.168.2.141:8080/v1"로 설정하고,
     // v1 뒤에 필요한 값("/bookstore/")은 그대로 붙입니다.
@@ -35,7 +33,6 @@ export async function POST(request: Request) {
       },
       body: JSON.stringify(reqBody),
     });
-    console.log("externalResponse::::::::::::::::::::::::::::::::dddd", externalResponse);
 
     // 208 상태 코드 처리 추가
     if (externalResponse.status === 208) {
@@ -56,7 +53,6 @@ export async function POST(request: Request) {
 
     // 외부 API 응답 데이터 읽기
     const externalData = await externalResponse.json();
-    // console.log("route.tsx:", externalData);
 
     return NextResponse.json({
       isSuccess: externalData.isSuccess,

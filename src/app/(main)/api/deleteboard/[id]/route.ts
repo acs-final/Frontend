@@ -22,7 +22,6 @@ export async function DELETE(request: Request) {
       headers: {
         "Content-Type": "application/json",
         "memberId": memberCookie ?? "",
-        // "name": "google_110277259246938366893",
       },
     });
 
@@ -37,7 +36,6 @@ export async function DELETE(request: Request) {
 
     // 외부 API 응답 데이터 읽기
     const externalData = await externalResponse.json();
-    // console.log("route.tsx:", externalData);
 
     return NextResponse.json({
       isSuccess: externalData.isSuccess,

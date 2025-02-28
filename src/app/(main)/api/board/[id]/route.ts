@@ -1,12 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-// import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server"; // ✅ Next.js 타입 추가
 
-type CreateCommentRequest ={
-  content: string;
-  score: number;
-}
 
 export async function GET(
   request: Request,
@@ -38,10 +32,6 @@ export async function GET(
     );
   }
 }
-
-
-// import { NextResponse } from "next/server";
-
 
 export async function POST(
   request: NextRequest,

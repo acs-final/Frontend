@@ -7,7 +7,6 @@ export async function POST(request: NextRequest) {
   const memberCookie = cookieStore.get("memberCookie")?.value;
 
   const baseApiUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
-  // const baseApiUrl = "http://192.168.2.141:8080/v1";
 
   // baseApiUrl의 마지막 '/'가 있으면 제거 후 '/fairytale/sonnet' 경로 추가
   const externalApiUrl = `${baseApiUrl.replace(/\/$/, "")}/fairytale/sonnet/streaming`;
@@ -34,7 +33,7 @@ export async function POST(request: NextRequest) {
   return new Response(externalResponse.body, {
     // 외부 응답의 Content-Type이 있으면 그대로 사용, 없으면 text/plain
     headers: {
-      "Content-Type": externalResponse.headers.get("Content-Type") || "text/plain",
+      "Content-Type": externalResponse.headers.get("Content-Type") ?? "text/plain",
     },
     // 필요하면 외부 응답의 상태 코드 등을 그대로 반환
     status: externalResponse.status,

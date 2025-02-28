@@ -40,13 +40,11 @@ export async function POST(request: Request) {
     console.log("Cognito 응답 코드:", response.status, data);
 
     if (!response.ok) {
-      // console.error("Cognito 요청 실패:", data);
       return NextResponse.json({ error: data }, { status: response.status });
     }
 
     return NextResponse.json(data, { status: 200 });
   } catch (error: any) {
-    // console.error("서버 오류 발생:", error.message);
     return NextResponse.json({ error: error.message || "서버 오류" }, { status: 500 });
   }
 }

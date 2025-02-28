@@ -18,7 +18,6 @@ export async function POST(
     const cookieStore = await cookies();
     const memberCookie = cookieStore.get("memberCookie")?.value;
     console.log("comment/[id]/route memberCookie:", memberCookie);
-    // console.log("📌 [게시판 API] 가져온 memberCookie:", memberCookie);
 
     if (!memberCookie) {
       console.warn("❌ `memberCookie`가 없습니다.");
