@@ -72,7 +72,7 @@ pipeline {
 
                 dir('manifests') {
                     sh """
-                        sed -i 's|image: 192.168.2.141:443/k8s-project/moai-front:.*|image: 192.168.2.141:443/k8s-project/moai-front:${BUILD_NUMBER}|g' deploy.yaml
+                        sed -i 's|image: 192.168.2.141:443/k8s-project/moai-front:.*|image: 192.168.2.141:443/k8s-project/moai-front:${BUILD_NUMBER}|g' front-deploy.yaml
                         git add deploy.yaml
                         git commit -m '[UPDATE] moai-front ${BUILD_NUMBER} image versioning' || echo 'No changes to commit'
                         git push origin main
