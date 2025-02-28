@@ -54,6 +54,9 @@ export default function BookDetailPage() {
 
   const [imageLoaded, setImageLoaded] = useState(false);
   const [audioLoaded, setAudioLoaded] = useState(false);
+  
+  // 폴링 인터벌 ref
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // 데이터가 완전히 로드되었는지 확인하는 함수
   const isDataComplete = (data: BookData | null) => {
@@ -104,27 +107,49 @@ export default function BookDetailPage() {
     }
   };
 
-  // 초기 데이터 로드 및 조건부 polling
+  // 초기 데이터 로드 및 폴링 설정
   useEffect(() => {
-    fetchBookData(); // 초기 로드
-
-    let interval: NodeJS.Timeout | null = null;
-    if (!isDataComplete(bookData)) {
-      interval = setInterval(() => {
-        fetchBookData(); // 0.5초마다 호출
-      }, 500);
-    }
-
-    // 데이터가 완전하면 interval 정리
-    if (isDataComplete(bookData) && interval) {
-      clearInterval(interval);
-    }
-
+    // 초기 데이터 로드
+    fetchBookData();
+    
     return () => {
-      if (interval) clearInterval(interval); // 컴포넌트 언마운트 시 정리
+      // 컴포넌트 언마운트 시 폴링 중단
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
     };
-  }, [id, bookData]); // bookData가 변경될 때마다 체크
-
+  }, [id]);
+  
+  // 데이터 완전성 체크 및 폴링 관리
+  useEffect(() => {
+    // 데이터가 완전하지 않은 경우 폴링 시작 또는 유지
+    if (!isDataComplete(bookData)) {
+      // 이미 폴링 중이 아닌 경우에만 새 폴링 시작
+      if (!pollingIntervalRef.current) {
+        console.log("Polling 시작: 데이터가 아직 완전하지 않음");
+        pollingIntervalRef.current = setInterval(() => {
+          console.log("Polling: 데이터 확인 중");
+          fetchBookData();
+        }, 1000);
+      }
+    } 
+    // 데이터가 완전한 경우 폴링 중단
+    else if (pollingIntervalRef.current) {
+      console.log("데이터 완전 로드됨, polling 중단");
+      clearInterval(pollingIntervalRef.current);
+      pollingIntervalRef.current = null;
+    }
+    
+    // 컴포넌트 언마운트 시 정리
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [bookData]);
+  
   const pages =
     bookData && bookData.body
       ? Object.keys(bookData.body)
@@ -189,7 +214,7 @@ export default function BookDetailPage() {
       });
       setActivePage(closestPage);
 
-      if (audioRef.current && pages[closestPage].audio) {
+      if (audioRef.current && pages[closestPage]?.audio) {
         const currentAudio = pages[closestPage].audio;
         if (currentAudio && audioRef.current.src !== currentAudio) {
           setAudioLoaded(false);
@@ -220,7 +245,7 @@ export default function BookDetailPage() {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        const currentAudio = pages[activePage].audio;
+        const currentAudio = pages[activePage]?.audio;
         if (currentAudio) {
           if (audioRef.current.src !== currentAudio) {
             audioRef.current.src = currentAudio;

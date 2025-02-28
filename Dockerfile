@@ -28,7 +28,7 @@ COPY --from=builder /app/.next/static/ ./.next/static/
 # 필요한 경우 public 폴더와 package.json도 복사 (standalone 모드에서는 package.json을 참조할 수 있음)
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./
-COPY --from=builder /app/tracer.js ./
+# COPY --from=builder /app/tracer.js ./
 COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3000
