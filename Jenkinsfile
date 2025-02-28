@@ -79,12 +79,17 @@ pipeline {
             steps {
                 // Kubernetes manifest 레포지토리 체크아웃
                 git credentialsId: 'github-token-wy',  // 동일한 GitHub 토큰 사용 (필요 시 별도 ID로 수정)
-                    url: 'https://github.com/acs-final/Frontend-manifest.git',
+                    url: 'https://wykim93@github.com/acs-final/Frontend-manifest.git',
                     branch: 'main'
                 
                 // Git 설정
                 sh 'git config user.email "wy930914@naver.com"'
                 sh 'git config user.name "wy"'
+                
+                sh """
+                git config --global credential.helper 'cache --timeout=3600'
+                git pull --rebase origin main
+                """
 
                 // 최신 상태로 업데이트
                 sh 'git pull --rebase origin main'
@@ -99,7 +104,7 @@ pipeline {
                 }
 
                 // GitHub에 푸시
-                sshagent(credentials: ['github-token']) {  // SSH 방식 사용 시 별도 SSH 키 필요, 여기서는 HTTPS 기반으로 가정
+                sshagent(credentials: ['github-token-wy']) {  // SSH 방식 사용 시 별도 SSH 키 필요, 여기서는 HTTPS 기반으로 가정
                     sh "git push origin main"
                 }
             }
