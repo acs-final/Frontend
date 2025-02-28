@@ -1,22 +1,55 @@
+// app/api/createbook/route.js (Next.js App Directory 방식)
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+
 export async function GET(request: Request) {
-    // 외부 API URL 설정 (환경변수가 없으면 기본값 사용)
-    const externalApiUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
-    const externalUrl = `${externalApiUrl}/fairytale/`;
-  
-    try {
-      const response = await fetch(externalUrl);
-      const data = await response.json();
-  
-      // 외부 API의 응답을 그대로 반환합니다.
-      return new Response(JSON.stringify(data), {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching gallery:", error);
-      return new Response("Internal Server Error", { status: 500 });
+  try {
+    const cookieStore = await cookies();
+    const memberCookie = cookieStore.get("memberCookie")?.value;
+
+    // 환경 변수에서 외부 API의 Base URL을 가져오거나 기본값 사용
+    const baseUrl = process.env.EXTERNAL_API_URL || "http://192.168.2.141:8080/v1";
+    const externalApiUrl = `${baseUrl}/fairytale/list`;
+
+    // 외부 API 호출
+    const externalResponse = await fetch(externalApiUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "memberId": memberCookie ?? "",
+      },
+      // 필요한 경우 request 데이터를 body에 포함시키세요.
+      // body: JSON.stringify(reqBody),
+    });
+
+    if (!externalResponse.ok) {
+      console.log(
+        "외부 API 응답 상태:",
+        externalResponse.status,
+        externalResponse.statusText
+      );
+      throw new Error("외부 API 호출에 실패했습니다.");
     }
+
+    // 외부 API 응답 데이터 읽기
+    const externalData = await externalResponse.json();
+    console.log("route.tsx:", externalData);
+
+    return NextResponse.json({
+      isSuccess: externalData.isSuccess,
+      code: externalData.code,
+      message: externalData.message,
+      result: externalData.result,
+    });
+  } catch (error) {
+    console.error("로그인 중 에러:", error);
+    if (error instanceof Error) {
+      console.error("에러 메시지:", error.message);
+    }
+    return NextResponse.json(
+      { isSuccess: false, message: error instanceof Error ? error.message : "알 수 없는 에러가 발생했습니다." },
+      { status: 500 }
+    );
   }
+}
   

@@ -86,13 +86,17 @@ function LoadingPageContent() {
 
   useEffect(() => {
     if (!isStreaming && data) {
-      const match = data.match(/스트리밍\s*완료\s*(\d+)/);
-      if (match?.[1]) {
-        router.push(`/booktest/${match[1]}`);
-      }      
+      try {
+        const parsedData = JSON.parse(`{${data}}`); // JSON 형식으로 변환
+        if (parsedData.fairytaleId) {
+          router.push(`/booktest/${parsedData.fairytaleId}`);
+        }
+      } catch (error) {
+        console.error("JSON 파싱 오류:", error);
+      }
     }
   }, [isStreaming, data, router]);
-
+  
   return (
     <div className="flex flex-col items-center justify-start min-h-screen p-4">
       {/* Lottie 애니메이션 */}
