@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        BUILD_NUMBER = "v29"
+        BUILD_NUMBER = "v30"
         IMAGE_NAME = "192.168.2.141:443/k8s-project/moai-front"
         HARBOR_CREDENTIALS = credentials('harbor')
         NEXT_PUBLIC_REDIRECT_URI = "https://c257-118-218-200-33.ngrok-free.app/cognitoresponse"
@@ -33,6 +33,21 @@ pipeline {
                 }
             }
         }
+                // 2. Quality Gate 결과 확인 단계
+        // stage('Quality Gate') {
+        //     steps {
+        //         script {
+        //             // 분석 결과가 처리될 때까지 대기 (기본적으로 최대 2분 대기)
+        //             timeout(time: 2, unit: 'MINUTES') {
+        //                 def qg = waitForQualityGate()
+        //                 if (qg.status != 'OK') {
+        //                     // 품질 게이트가 통과되지 않으면 빌드 실패 처리
+        //                     error "Pipeline aborted due to Quality Gate failure: ${qg.status}"
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
         stage('Login to Harbor') {
             steps {
