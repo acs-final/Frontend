@@ -1,10 +1,10 @@
 pipeline {
     agent any
     environment {
-        BUILD_NUMBER = "v28"
+        BUILD_NUMBER = "v29"
         IMAGE_NAME = "192.168.2.141:443/k8s-project/moai-front"
         HARBOR_CREDENTIALS = credentials('harbor')
-        NEXT_PUBLIC_REDIRECT_URI = "https://a7aa-118-218-200-33.ngrok-free.app/cognitoresponse"
+        NEXT_PUBLIC_REDIRECT_URI = "https://c257-118-218-200-33.ngrok-free.app/cognitoresponse"
     }
 
     stages {
