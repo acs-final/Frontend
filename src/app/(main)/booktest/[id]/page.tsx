@@ -5,7 +5,6 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Play, Pause } from "lucide-react";
 
-// API 응답 구조에 맞춘 인터페이스 정의
 interface Body {
   [key: string]: string;
 }
@@ -53,12 +52,7 @@ export default function BookDetailPage() {
   const [currentTime, setCurrentTime] = useState(0);
 
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [audioLoaded, setAudioLoaded] = useState(false);
-  
-  // 폴링 인터벌 ref
-  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 데이터가 완전히 로드되었는지 확인하는 함수
   const isDataComplete = (data: BookData | null) => {
     if (!data) return false;
     const hasBody = data.body && Object.keys(data.body).length > 0;
@@ -73,7 +67,6 @@ export default function BookDetailPage() {
     return hasBody && hasImages && hasMp3s;
   };
 
-  // API 호출 함수
   const fetchBookData = async () => {
     if (!id) return;
     try {
@@ -97,6 +90,7 @@ export default function BookDetailPage() {
           }
           return newData;
         });
+        console.log("bookData:", data.result);
         setLoading(false);
       } else {
         throw new Error(data.message);
@@ -107,49 +101,19 @@ export default function BookDetailPage() {
     }
   };
 
-  // 초기 데이터 로드 및 폴링 설정
   useEffect(() => {
-    // 초기 데이터 로드
     fetchBookData();
-    
-    return () => {
-      // 컴포넌트 언마운트 시 폴링 중단
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
-    };
   }, [id]);
-  
-  // 데이터 완전성 체크 및 폴링 관리
+
   useEffect(() => {
-    // 데이터가 완전하지 않은 경우 폴링 시작 또는 유지
-    if (!isDataComplete(bookData)) {
-      // 이미 폴링 중이 아닌 경우에만 새 폴링 시작
-      if (!pollingIntervalRef.current) {
-        console.log("Polling 시작: 데이터가 아직 완전하지 않음");
-        pollingIntervalRef.current = setInterval(() => {
-          console.log("Polling: 데이터 확인 중");
-          fetchBookData();
-        }, 1000);
-      }
-    } 
-    // 데이터가 완전한 경우 폴링 중단
-    else if (pollingIntervalRef.current) {
-      console.log("데이터 완전 로드됨, polling 중단");
-      clearInterval(pollingIntervalRef.current);
-      pollingIntervalRef.current = null;
-    }
-    
-    // 컴포넌트 언마운트 시 정리
+    const pollingInterval = !isDataComplete(bookData)
+      ? setInterval(() => fetchBookData(), 1000)
+      : null;
     return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
+      if (pollingInterval) clearInterval(pollingInterval);
     };
   }, [bookData]);
-  
+
   const pages =
     bookData && bookData.body
       ? Object.keys(bookData.body)
@@ -166,13 +130,14 @@ export default function BookDetailPage() {
                 ? bookData.imageUrl[index % bookData.imageUrl.length].imageUrl
                 : null,
             audio:
-              bookData.mp3Url && bookData.mp3Url.length > 0
-                ? bookData.mp3Url[index % bookData.mp3Url.length].mp3Url
+              bookData.mp3Url &&
+              bookData.mp3Url.length > 0 &&
+              index < bookData.mp3Url.length
+                ? bookData.mp3Url[index].mp3Url
                 : null,
           }))
       : [];
 
-  // Intersection Observer 설정
   useEffect(() => {
     if (!sentinelRef.current || !containerRef.current) return;
     const observer = new IntersectionObserver(
@@ -181,17 +146,12 @@ export default function BookDetailPage() {
           setVisiblePages((prev) => Math.min(prev + 1, pages.length));
         }
       },
-      {
-        root: containerRef.current,
-        rootMargin: "100px",
-        threshold: 0.1,
-      }
+      { root: containerRef.current, rootMargin: "100px", threshold: 0.1 }
     );
     observer.observe(sentinelRef.current);
     return () => observer.disconnect();
   }, [visiblePages, pages.length]);
 
-  // 스크롤 이벤트로 activePage 설정 및 오디오 로드
   useEffect(() => {
     if (!containerRef.current || !pages.length) return;
 
@@ -212,55 +172,59 @@ export default function BookDetailPage() {
           closestPage = index;
         }
       });
-      setActivePage(closestPage);
-
-      if (audioRef.current && pages[closestPage]?.audio) {
-        const currentAudio = pages[closestPage].audio;
-        if (currentAudio && audioRef.current.src !== currentAudio) {
-          setAudioLoaded(false);
-          audioRef.current.src = currentAudio;
-          console.log("오디오 소스 설정:", currentAudio);
+      if (closestPage !== activePage) {
+        stopAudio();
+        setActivePage(closestPage);
+        if (pages[closestPage].audio && audioRef.current) {
+          audioRef.current.src = pages[closestPage].audio as string;
           audioRef.current.load();
+          console.log("Audio Source Updated:", pages[closestPage].audio);
         }
       }
     };
 
     const container = containerRef.current;
     container.addEventListener("scroll", handleScroll);
-
-    if (audioRef.current && pages[activePage]?.audio) {
-      const initialAudio = pages[activePage].audio;
-      audioRef.current.src = initialAudio;
-      audioRef.current.load();
-      console.log("초기 오디오 소스 설정:", initialAudio);
-    }
-
     return () => container.removeEventListener("scroll", handleScroll);
   }, [pages, activePage]);
 
-  // 오디오 재생 토글
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+    }
+  };
+
   const toggleAudio = () => {
-    if (!audioRef.current) return;
+    if (!audioRef.current || !pages[activePage].audio) {
+      console.error("오디오 요소 또는 소스가 없습니다:", pages[activePage]);
+      return;
+    }
+
     try {
       if (isPlaying) {
         audioRef.current.pause();
+        setIsPlaying(false);
       } else {
-        const currentAudio = pages[activePage]?.audio;
-        if (currentAudio) {
-          if (audioRef.current.src !== currentAudio) {
-            audioRef.current.src = currentAudio;
-            audioRef.current.load();
-          }
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise.catch((error) => {
+        const currentAudio = pages[activePage].audio;
+        if (audioRef.current.src !== currentAudio) {
+          audioRef.current.src = currentAudio as string;
+          audioRef.current.load();
+        }
+        const playPromise = audioRef.current.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              console.log("오디오 재생 시작:", currentAudio);
+              setIsPlaying(true);
+            })
+            .catch((error) => {
               console.error("오디오 재생 실패:", error);
               setIsPlaying(false);
             });
-          }
         }
       }
-      setIsPlaying(!isPlaying);
     } catch (error) {
       console.error("오디오 재생 중 에러:", error);
       setIsPlaying(false);
@@ -282,21 +246,15 @@ export default function BookDetailPage() {
   };
 
   return (
-    <section className="relative">
-      {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-200 bg-opacity-75">
-          <div className="text-lg">로딩 중...</div>
-        </div>
-      )}
-      {error && (
-        <div className="fixed inset-0 flex items-center justify-center bg-red-200 bg-opacity-75">
-          <div className="text-lg text-red-700">{error}</div>
-        </div>
-      )}
+    <section className="relative min-h-screen">
+      {loading && <div>로딩 중...</div>}
+      {error && <div>{error}</div>}
+
+      {/* 스크롤 컨테이너 */}
       <div
         ref={containerRef}
         className="snap-y snap-mandatory overflow-y-scroll scroll-smooth"
-        style={{ height: "calc(100vh - 60px)", marginTop: "60px" }}
+        style={{ height: "calc(100vh - 60px)", marginBottom: "60px" }} // 상단 여백 제거, 하단만 유지
       >
         {pages.slice(0, visiblePages).map((page, index) => (
           <div
@@ -304,7 +262,6 @@ export default function BookDetailPage() {
             data-index={index}
             className="page-container snap-start flex flex-col md:flex-row items-center gap-8 p-8 border-b min-h-[calc(100vh-60px)]"
           >
-            {/* 동화 그림 */}
             <div className="flex-shrink-0 w-full md:w-1/2 flex justify-center items-center">
               {page.image ? (
                 <>
@@ -325,91 +282,72 @@ export default function BookDetailPage() {
                 <div className="w-3/4 max-w-lg h-64 bg-gray-300 animate-pulse rounded-lg shadow-md"></div>
               )}
             </div>
-            {/* 동화 텍스트 및 오디오 컨트롤 */}
             <div className="w-full md:w-1/2 flex flex-col justify-center">
               <h2 className="text-2xl font-bold mb-4">{page.title}</h2>
               <p className="text-lg leading-relaxed mb-4">{page.text}</p>
-              {activePage === index && (
-                <div className="flex flex-col items-center gap-3">
-                  {page.audio ? (
-                    !audioLoaded ? (
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-300 animate-pulse rounded-full"></div>
-                        <div className="w-[300px] h-2 bg-gray-300 animate-pulse rounded-lg"></div>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-3">
-                        <button
-                          className="audio-button flex items-center justify-center w-10 h-10 rounded-full bg-blue-500 hover:bg-blue-600 text-white"
-                          onClick={toggleAudio}
-                        >
-                          {isPlaying ? (
-                            <Pause size={20} />
-                          ) : (
-                            <Play size={20} />
-                          )}
-                        </button>
-                        <div className="flex items-center gap-2 min-w-[300px]">
-                          <span className="text-sm w-12">
-                            {formatTime(currentTime)}
-                          </span>
-                          <input
-                            type="range"
-                            min="0"
-                            max={duration || 0}
-                            value={currentTime}
-                            onChange={handleTimeChange}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                          />
-                          <span className="text-sm w-12">
-                            {formatTime(duration)}
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-300 animate-pulse rounded-full"></div>
-                      <div className="w-[300px] h-2 bg-gray-300 animate-pulse rounded-lg"></div>
-                    </div>
-                  )}
-                  {page.audio && (
-                    <audio
-                      ref={audioRef}
-                      onLoadedMetadata={(e) => {
-                        console.log("오디오 메타데이터 로드됨:", page.audio);
-                        setDuration(e.currentTarget.duration);
-                        setAudioLoaded(true);
-                      }}
-                      onTimeUpdate={(e) =>
-                        setCurrentTime(e.currentTarget.currentTime)
-                      }
-                      onEnded={() => {
-                        setIsPlaying(false);
-                        if (audioRef.current) audioRef.current.currentTime = 0;
-                      }}
-                      onError={(e) => {
-                        console.error("오디오 로드 에러:", e);
-                        setAudioLoaded(true);
-                        setIsPlaying(false);
-                      }}
-                      style={{ display: "none" }}
-                    />
-                  )}
-                </div>
-              )}
             </div>
           </div>
         ))}
         <div ref={sentinelRef} className="h-10"></div>
       </div>
-      <div className="flex justify-center gap-4 py-4 border-t border-gray-200 mt-4">
-        <Link href={`/review/${bookData?.fairytaleId}`}>
-          <button className="h-9 px-4 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors flex items-center justify-center">
-            평가하기
-          </button>
-        </Link>
+
+      {/* 고정된 하단 영역: 오디오 컨트롤과 평가하기 버튼 */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg z-10 flex justify-center items-center gap-8">
+        {/* 오디오 컨트롤 */}
+        {pages[activePage]?.audio ? (
+          <div className="flex items-center gap-3">
+            <button
+              className="audio-button flex items-center justify-center w-10 h-10 rounded-full bg-blue-500 hover:bg-blue-600 text-white"
+              onClick={toggleAudio}
+            >
+              {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+            </button>
+            <div className="flex items-center gap-2 min-w-[300px]">
+              <span className="text-sm w-12">{formatTime(currentTime)}</span>
+              <input
+                type="range"
+                min="0"
+                max={duration || 0}
+                value={currentTime}
+                onChange={handleTimeChange}
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+              />
+              <span className="text-sm w-12">{formatTime(duration)}</span>
+            </div>
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500">이 페이지에는 오디오가 없습니다.</p>
+        )}
+
+        {/* 평가하기 버튼 */}
+        {bookData?.fairytaleId ? (
+          <Link href={`/review/${bookData.fairytaleId}`}>
+            <button className="h-9 px-4 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-lg transition-colors flex items-center justify-center">
+              평가하기
+            </button>
+          </Link>
+        ) : (
+          <p className="text-sm text-gray-500">평가할 동화가 없습니다.</p>
+        )}
       </div>
+
+      <audio
+        ref={audioRef}
+        onLoadedMetadata={(e) => {
+          console.log("오디오 메타데이터 로드됨:", pages[activePage]?.audio);
+          setDuration(e.currentTarget.duration);
+        }}
+        onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+        onEnded={() => {
+          setIsPlaying(false);
+          if (audioRef.current) audioRef.current.currentTime = 0;
+        }}
+        onError={(e) => {
+          console.error("오디오 로드 에러:", e);
+          setIsPlaying(false);
+        }}
+        style={{ display: "none" }}
+      />
     </section>
   );
 }
