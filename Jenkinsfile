@@ -61,7 +61,7 @@ pipeline {
         stage('K8S Manifest Update') {
             steps {
                 git credentialsId: 'github-token-wy',
-                    url: 'https://github.com/acs-final/Frontend-manifest.git',
+                    url: 'https://github.com/acs-final/manifest.git',
                     branch: 'main'
                 
                 sh 'git config user.email "wy930914@naver.com"'
@@ -70,7 +70,7 @@ pipeline {
                 
                 sh 'git pull --rebase origin main'
 
-                dir('manifests') {
+                dir('front') {
                     sh """
                         sed -i 's|image: 192.168.2.141:443/k8s-project/moai-front:.*|image: 192.168.2.141:443/k8s-project/moai-front:${BUILD_NUMBER}|g' front-deploy.yaml
                         git add front-deploy.yaml
