@@ -253,14 +253,15 @@ export default function BookDetailPage() {
       {/* 스크롤 컨테이너 */}
       <div
         ref={containerRef}
-        className="snap-y snap-mandatory overflow-y-scroll scroll-smooth"
-        style={{ height: "calc(100vh - 60px)", marginBottom: "60px" }} // 상단 여백 제거, 하단만 유지
+        className="snap-y snap-mandatory overflow-y-scroll scroll-smooth [&::-webkit-scrollbar]:hidden"
+        style={{ height: "calc(87vh)"}} // 상단 여백 제거, 하단만 유지
       >
         {pages.slice(0, visiblePages).map((page, index) => (
           <div
             key={index}
             data-index={index}
-            className="page-container snap-start flex flex-col md:flex-row items-center gap-8 p-8 border-b min-h-[calc(100vh-60px)]"
+            // className="page-container snap-start flex flex-col md:flex-row items-center gap-8 p-8 border-b min-h-[calc(85vh)]"
+            className="page-container flex flex-col md:flex-row items-center gap-8 p-8 border-b h-[80vh]"
           >
             <div className="flex-shrink-0 w-full md:w-1/2 flex justify-center items-center">
               {page.image ? (
@@ -292,7 +293,10 @@ export default function BookDetailPage() {
       </div>
 
       {/* 고정된 하단 영역: 오디오 컨트롤과 평가하기 버튼 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg z-10 flex justify-center items-center gap-8">
+      {/* <div className="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg z-10 flex justify-center items-center gap-8"> */}
+      <div className="footer absolute left-0 right-0 p-1 z-100 h-2 flex justify-center items-center gap-8">
+      {/* <div className="footer absolute bottom-0 left-0 right-0 p-4 z-10 shadow-lg bg-white justify-center items-center w-full gap-8"> */}
+      {/* <div className="fixed bottom-0 flex-col left-0 right-0 bg-white p-4 shadow-lg z-10 flex justify-center items-center gap-8"> */}
         {/* 오디오 컨트롤 */}
         {pages[activePage]?.audio ? (
           <div className="flex items-center gap-3">

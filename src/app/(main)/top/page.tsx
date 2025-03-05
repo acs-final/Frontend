@@ -17,35 +17,53 @@ export default function BookRecommendationPage() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [apiResponse, setApiResponse] = React.useState<any>(null);
+  const abortControllerRef = React.useRef<AbortController | null>(null);
 
   React.useEffect(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
+
     const fetchBooks = async () => {
       try {
-        const response = await fetch("/api/top");
+        const response = await fetch("/api/top", {
+          signal: abortControllerRef.current?.signal
+        });
         const data = await response.json();
-        console.log(data);
-
-        // API 응답 전체를 저장합니다.
-        setApiResponse(data);
-
-        // API 응답에 따른 도서 목록 설정 로직
-        if (Array.isArray(data)) {
-          setBooks(data);
-        } else if (data && Array.isArray(data.books)) {
-          setBooks(data.books);
-        } else if (data && Array.isArray(data.result)) {
-          setBooks(data.result);
-        } else {
-          setBooks([]);
+        
+        if (abortControllerRef.current) {
+          setApiResponse(data);
+          if (Array.isArray(data)) {
+            setBooks(data);
+          } else if (data && Array.isArray(data.books)) {
+            setBooks(data.books);
+          } else if (data && Array.isArray(data.result)) {
+            setBooks(data.result);
+          } else {
+            setBooks([]);
+          }
         }
-      } catch (err) {
-        setError("도서 목록을 불러오는데 실패했습니다.");
+      } catch (error: unknown) {
+        if (error instanceof Error && error.name !== 'AbortError') {
+          setError("도서 목록을 불러오는데 실패했습니다.");
+        }
       } finally {
-        setIsLoading(false);
+        if (abortControllerRef.current) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchBooks();
+
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    };
   }, []);
 
   if (isLoading) return <div className="text-center py-8">로딩중...</div>;

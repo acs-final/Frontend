@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import {
@@ -21,6 +21,7 @@ import {
 import { Button } from "@/app/(main)/components/ui/button";
 import { ArrowBigRight, ArrowBigLeft, Play, Pause } from "lucide-react";
 import { LoaderIcon } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
 
 // 타입 정의
 interface FormValues {
@@ -56,11 +57,13 @@ function MainTestPage() {
   const [duration, setDuration] = useState(0);
   const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   // 장르별 이미지 매핑 추가
   const genreImages = {
-    "한국 전래 동화": "/form/korean.png",
-    "세계 전래 동화": "/form/world.png",
+    "한국전래동화": "/form/korean.png",
+    "세계전래동화": "/form/world.png",
     "판타지 동화": "/form/fantasy.png",
     "동물 동화": "/form/animal.png",
     "가족 동화": "/form/family.png",
@@ -102,8 +105,8 @@ function MainTestPage() {
   const formSchema = z.object({
     genre: z.enum(
       [
-        "한국 전래 동화",
-        "세계 전래 동화",
+        "한국전래동화",
+        "세계전래동화",
         "판타지 동화",
         "동물 동화",
         "가족 동화",
@@ -148,7 +151,7 @@ function MainTestPage() {
       });
 
       // loading 페이지로 리다이렉트 (쿼리스트링 포함)
-      window.location.href = `/loading?${queryParams.toString()}`;
+      router.push(`/loading?${queryParams.toString()}`);
 
     } catch (error) {
       console.error("동화 생성 중 에러:", error);
@@ -191,8 +194,8 @@ function MainTestPage() {
                       <div>
                         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                           {[
-                            "한국 전래 동화",
-                            "세계 전래 동화",
+                            "한국전래동화",
+                            "세계전래동화",
                             "판타지 동화",
                             "동물 동화",
                             "가족 동화",
