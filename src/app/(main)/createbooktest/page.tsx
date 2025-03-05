@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import {
@@ -367,5 +367,9 @@ function MainTestPage() {
 }
 
 export default function Page() {
-  return <MainTestPage />;
+  return (
+    <Suspense fallback={<div className="text-center py-8">로딩중...</div>}>
+      <MainTestPage />
+    </Suspense>
+  );
 }
