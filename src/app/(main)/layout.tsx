@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientProviders from "./ClientProviders";
+import { Toaster } from "@/app/(main)/components/ui/toaster";
 
 // 추가 컴포넌트
 import { AppSidebar } from "@/app/(main)/components/app-sidebar";

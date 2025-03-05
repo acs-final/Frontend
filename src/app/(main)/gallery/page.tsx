@@ -153,7 +153,7 @@ const Home: NextPage = () => {
               className="mb-4 relative"
             >
               <Link
-                href={`/booktest/${image.fairytaleId}`}
+                href={`/book/${image.fairytaleId}`}
                 className="group relative block w-full cursor-zoom-in"
               >
                 <Image

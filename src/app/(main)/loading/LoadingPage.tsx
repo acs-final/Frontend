@@ -38,7 +38,7 @@ function LoadingPageContent() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ genre, gender, challenge }),
       });
-
+      console.log("ssssss", response);
       const reader = response.body?.getReader();
       if (!reader) {
         console.error("ReadableStream을 가져올 수 없습니다.");
@@ -88,25 +88,26 @@ function LoadingPageContent() {
     if (!isStreaming && data) {
       const match = data.match(/스트리밍\s*완료\s*(\d+)/);
       if (match?.[1]) {
-        router.push(`/booktest/${match[1]}`);
+        router.push(`/book/${match[1]}`);
       }      
     }
   }, [isStreaming, data, router]);
   
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen p-4">
+    <div className="flex flex-col items-center min-h-screen p-4 fixed inset-0 bg-white">
+      {/* 상단 스트리밍 데이터 */}
+      <div className="w-full md:w-[60%] p-4 text-center mt-8">
+        <div className="text-lg font-semibold">
+          {data}
+        </div>
+      </div>
+
       {/* Lottie 애니메이션 */}
-      <div className="w-28 h-28 md:w-36 md:h-36 mb-4">
-        <LottieLoader />
+      <div className="mt-8">
+        <div className="w-52 h-52">
+          <LottieLoader />
+        </div>
       </div>
-
-      {/* 스트리밍 데이터 박스 */}
-      <div className="w-full md:w-[60%] mx-auto p-4 border rounded-md shadow-md bg-white text-center mb-4">
-        <div className="text-lg font-semibold whitespace-pre-wrap">{data}</div>
-      </div>
-
-      {/* 스트리밍 중 표시 */}
-      {isStreaming && <p className="text-blue-500"></p>}
     </div>
   );
 }

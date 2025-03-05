@@ -33,14 +33,17 @@ export default function LottieLoader() {
   }, [index]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      {/* Lottie 애니메이션 */}
-      <div className="w-52 h-52">
-        <Lottie animationData={animationData} loop autoplay />
-      </div>
+<div className="flex flex-col items-center justify-center min-h-screen">
+  {/* Lottie 애니메이션 */}
+  <div className="relative w-52 h-52">
+    <Lottie animationData={animationData} loop autoplay />
+  </div>
 
-      {/* 한 글자씩 나타나는 로딩 메시지 */}
-      <p className="mt-4 text-lg font-semibold text-gray-700">{displayedText}</p>
-    </div>
+  {/* 한 글자씩 나타나는 로딩 메시지 */}
+  <p className="mt-28 w-80 text-lg font-semibold text-gray-700 text-center break-words max-w-xs">
+    {displayedText}
+  </p>
+</div>
+
   );
 }

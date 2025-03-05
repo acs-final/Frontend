@@ -7,7 +7,7 @@ import { Button } from "@/app/(main)/components/ui/button";
 import { Textarea } from "@/app/(main)/components/ui/textarea"
 import Image from "next/image";
 import { Toaster } from "@/app/(main)/components/ui/toaster"
-import { useToast } from "@/app/(main)/hooks/use-toast";
+import { toast, useToast } from "@/app/(main)/hooks/use-toast";
 
 
 
@@ -80,6 +80,37 @@ const HalfStar = () => (
     </svg>
   </div>
 );
+
+// sanitize 유틸리티 함수 추가
+const sanitizeInput = (input: string): string => {
+  return input
+    .replace(/[<>]/g, '') // HTML 태그 제거
+    .replace(/['"]/g, '') // 따옴표 제거
+    .trim(); // 앞뒤 공백 제거
+};
+
+// 입력값 유효성 검사
+const validateInput = (input: string, field: string): boolean => {
+  if (!input || input.trim().length === 0) {
+    toast({
+      variant: "destructive",
+      title: `${field}이(가) 비어있습니다.`,
+      description: "내용을 입력해주세요."
+    });
+    return false;
+  }
+  
+  if (input.length > 1000) { // 최대 길이 제한
+    toast({
+      variant: "destructive",
+      title: `${field} 길이 초과`,
+      description: "1000자 이내로 작성해주세요."
+    });
+    return false;
+  }
+  
+  return true;
+};
 
 export default function ReviewPage() {
   const { id } = useParams();
@@ -223,11 +254,25 @@ export default function ReviewPage() {
     }
   };
 
-  const handleSubmit = async () => {
-    // sessionStorage에서 'sub' 값을 가져와 memberId로 설정
-    const memberId = sessionStorage.getItem("sub");
-    console.log("memberId:", memberId);
+  // 입력값 변경 핸들러 수정
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const sanitizedValue = sanitizeInput(e.target.value);
+    setTitle(sanitizedValue);
+  };
 
+  const handleBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const sanitizedValue = sanitizeInput(e.target.value);
+    setBody(sanitizedValue);
+  };
+
+  const handleSubmit = async () => {
+    // 입력값 검증
+    if (!validateInput(title, "제목") || !validateInput(body, "내용")) {
+      return;
+    }
+
+    const memberId = sessionStorage.getItem("sub");
+    
     try {
       const response = await fetch("/api/createboard", {
         method: "POST",
@@ -236,8 +281,8 @@ export default function ReviewPage() {
           "memberId": memberId || "",
         },
         body: JSON.stringify({
-          title,
-          body,
+          title: sanitizeInput(title), // 한번 더 sanitize
+          body: sanitizeInput(body),
           score: rating,
           fairytaleId: selectedBook ? selectedBook.fairytaleId : 0,
           imageUrl,
@@ -295,7 +340,8 @@ export default function ReviewPage() {
                 placeholder="책 제목을 입력하세요"
                 className="w-full"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={handleTitleChange}
+                maxLength={1000}
               />
             </div>
             <div className="flex-grow flex flex-col">
@@ -304,7 +350,8 @@ export default function ReviewPage() {
                 placeholder="독후감 내용을 작성해주세요"
                 className="w-full h-80 p-3 border rounded-md focus:ring-2 focus:ring-primary focus:border-primary resize-none"
                 value={body}
-                onChange={(e) => setBody(e.target.value)}
+                onChange={handleBodyChange}
+                maxLength={1000}
               />
             </div>
           </div>
