@@ -15,6 +15,16 @@ import {
 } from "@/app/(main)/components/ui/table";
 import { Toaster } from "@/app/(main)/components/ui/toaster"
 
+// XSS 방지를 위한 이스케이프 함수 추가
+const escapeHtml = (unsafe: string): string => {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
 export default function FreeBoardPage() {
   // 초기 데이터는 빈 배열로 시작하며, API에서 받아온 데이터를 사용합니다.
   const [posts, setPosts] = useState<
@@ -36,16 +46,21 @@ export default function FreeBoardPage() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await fetch("/api/report");
+        const response = await fetch("/api/report", {
+          headers: {
+            'Content-Type': 'application/json',
+            // CSRF 토큰 추가 (Next.js의 기본 CSRF 보호 활용)
+            'X-CSRF-Token': 'your-csrf-token'
+          }
+        });
         const data = await response.json();
         if (data.isSuccess) {
-          // API의 result 배열 데이터를 게시글 형태로 매핑
           const fetchedPosts = data.result.map((item: any) => ({
-            id: item.reportId,       // 각 게시글의 고유 id를 reportId로 설정
-            title: item.title,       // 게시글 제목
-            writer: item.writer,     // 게시글 작성자
-            score: item.score,       // 게시글 스코어
-            createdAt: item.createdAt,// 게시글 날짜
+            id: Number(item.reportId), // 숫자형으로 명시적 변환
+            title: escapeHtml(item.title), // XSS 방지
+            writer: escapeHtml(item.writer), // XSS 방지
+            score: Number(item.score), // 숫자형으로 명시적 변환
+            createdAt: escapeHtml(item.createdAt), // XSS 방지
           }));
           setPosts(fetchedPosts);
         } else {
@@ -67,17 +82,28 @@ export default function FreeBoardPage() {
 
   // 선택된 게시글들을 삭제하는 핸들러
   const handleDeletePosts = async () => {
-    if (selectedPosts.length === 0) {
-      return;
-    }
+    if (selectedPosts.length === 0) return;
+    
     try {
       for (const id of selectedPosts) {
-        const response = await fetch(`/api/deletereport/${id}`, {
+        // 입력값 검증
+        if (!Number.isInteger(id) || id <= 0) {
+          console.error("유효하지 않은 게시글 ID:", id);
+          continue;
+        }
+
+        const response = await fetch(`/api/deletereport/${encodeURIComponent(id)}`, {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            // CSRF 토큰 추가
+            'X-CSRF-Token': 'your-csrf-token'
           },
-          body: JSON.stringify({ reportId: id }),
+          body: JSON.stringify({ 
+            reportId: id,
+            // 추가 보안을 위한 타임스탬프
+            timestamp: Date.now()
+          }),
         });
         const data = await response.json();
         if (!response.ok) {

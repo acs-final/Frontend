@@ -98,16 +98,17 @@ const Home: NextPage = () => {
   }, [paging.page, paging.size]);
   
   // 좋아요 버튼 클릭 처리
-  const handleLikeClick = async (fairytaleId: number) => {
+  const handleLikeClick = async (fairytaleId: number, isPressed: boolean) => {
     try {
-      const res = await fetch(`/api/like`, {
+      const endpoint = isPressed ? '/api/dislike' : '/api/like';
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ fairytaleId }) // 요청 본문에 fairytaleId 포함
+        body: JSON.stringify({ fairytaleId })
       });
-  
+
       if (res.ok) {
         // 좋아요 상태 업데이트
         setImages(prevImages => 
@@ -177,7 +178,7 @@ const Home: NextPage = () => {
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleLikeClick(image.fairytaleId);
+                  handleLikeClick(image.fairytaleId, image.isPressed);
                 }}
                 className="absolute bottom-2 right-2 bg-white p-2 rounded-full shadow-md z-10 flex items-center justify-center"
                 aria-label="좋아요"

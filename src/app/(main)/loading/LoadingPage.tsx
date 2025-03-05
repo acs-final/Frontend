@@ -56,7 +56,10 @@ function LoadingPageContent() {
             break;
           }
           const chunkValue = decoder.decode(value, { stream: true });
+          console.log('Raw Chunk:', chunkValue); // 원본 청크 데이터
+          
           const lines = chunkValue.split("\n");
+          console.log('Split Lines:', lines); // 라인별로 분리된 데이터
 
           const cleanedLines = lines.map((line) => {
             const trimmed = line.trim();
@@ -68,8 +71,12 @@ function LoadingPageContent() {
             }
             return "";
           });
-
+          
+          console.log('Cleaned Lines:', cleanedLines); // 정제된 라인들
+          
           const finalChunkValue = cleanedLines.join(" ");
+          console.log('Final Chunk Value:', finalChunkValue); // 최종 처리된 청크 값
+
           setData((prev) => {
             const updatedText = (prev + " " + finalChunkValue).trim();
             return updatedText.length > 500 ? updatedText.slice(-500) : updatedText;
